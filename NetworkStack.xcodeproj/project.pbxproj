@@ -12,6 +12,10 @@
 		701762931C6D117D008D42C6 /* NetworkStackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762921C6D117D008D42C6 /* NetworkStackTests.swift */; };
 		7017629F1C6D1230008D42C6 /* JaSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7017629D1C6D1230008D42C6 /* JaSON.framework */; };
 		701762A01C6D1230008D42C6 /* SimpleKeychain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7017629E1C6D1230008D42C6 /* SimpleKeychain.framework */; };
+		701762A31C6D2F4B008D42C6 /* OAuth2Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A21C6D2F4B008D42C6 /* OAuth2Token.swift */; };
+		701762A51C6D2F54008D42C6 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A41C6D2F54008D42C6 /* Network.swift */; };
+		701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */; };
+		701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A81C6D2F64008D42C6 /* AuthRequests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,8 +35,12 @@
 		7017628D1C6D117D008D42C6 /* NetworkStackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NetworkStackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		701762921C6D117D008D42C6 /* NetworkStackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStackTests.swift; sourceTree = "<group>"; };
 		701762941C6D117D008D42C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7017629D1C6D1230008D42C6 /* JaSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JaSON.framework; path = JaSON.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7017629E1C6D1230008D42C6 /* SimpleKeychain.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SimpleKeychain.framework; path = SimpleKeychain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7017629D1C6D1230008D42C6 /* JaSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = JaSON.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7017629E1C6D1230008D42C6 /* SimpleKeychain.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SimpleKeychain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		701762A21C6D2F4B008D42C6 /* OAuth2Token.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuth2Token.swift; sourceTree = "<group>"; };
+		701762A41C6D2F54008D42C6 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
+		701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
+		701762A81C6D2F64008D42C6 /* AuthRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthRequests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +86,10 @@
 			isa = PBXGroup;
 			children = (
 				701762861C6D117D008D42C6 /* NetworkStack.h */,
+				701762A41C6D2F54008D42C6 /* Network.swift */,
+				701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */,
+				701762A81C6D2F64008D42C6 /* AuthRequests.swift */,
+				701762A21C6D2F4B008D42C6 /* OAuth2Token.swift */,
 				701762881C6D117D008D42C6 /* Info.plist */,
 				701762A11C6D1237008D42C6 /* Frameworks */,
 			);
@@ -211,6 +223,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				701762A51C6D2F54008D42C6 /* Network.swift in Sources */,
+				701762A31C6D2F4B008D42C6 /* OAuth2Token.swift in Sources */,
+				701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */,
+				701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,6 +343,7 @@
 		701762981C6D117D008D42C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -342,12 +359,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.octanner.NetworkStack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		701762991C6D117D008D42C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
