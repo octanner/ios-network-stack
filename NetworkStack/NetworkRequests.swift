@@ -9,17 +9,17 @@
 import Foundation
 import JaSON
 
-protocol APIRequests {
+public protocol APIRequests {
     func GET(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void)
     func POST(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void)
     func PATCH(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void)
 }
 
-struct NetworkAPIRequests: APIRequests {
+public struct NetworkAPIRequests: APIRequests {
     
     // MARK: - Initializers
     
-    init(appState: AppStateRepresentable) {
+    public init(appState: AppStateRepresentable) {
         self.network = Network(appState: appState)
     }
     
@@ -31,15 +31,15 @@ struct NetworkAPIRequests: APIRequests {
     
     // MARK: - API functions
     
-    func GET(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func GET(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         network.GET(endpoint, parameters: parameters, completion: completion)
     }
     
-    func POST(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func POST(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         network.POST(endpoint, parameters: parameters, completion: completion)
     }
     
-    func PATCH(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func PATCH(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         network.PATCH(endpoint, parameters: parameters, completion: completion)
     }
     

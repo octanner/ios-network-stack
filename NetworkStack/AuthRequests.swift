@@ -8,16 +8,16 @@
 
 import Foundation
 
-protocol AuthRequests {
+public protocol AuthRequests {
     func logIn(username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void)
     func logOut()
 }
 
-struct AuthAPIRequests: AuthRequests {
+public struct AuthAPIRequests: AuthRequests {
     
     // MARK: - Initializers
     
-    init(appState: AppStateRepresentable) {
+    public init(appState: AppStateRepresentable) {
         self.network = Network(appState: appState)
     }
     
@@ -29,11 +29,11 @@ struct AuthAPIRequests: AuthRequests {
     
     // MARK: - Auth functions
     
-    func logIn(username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) {
+    public func logIn(username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) {
         network.logIn(username, password: password, completion: completion)
     }
     
-    func logOut() {
+    public func logOut() {
         network.logOut()
     }
 }

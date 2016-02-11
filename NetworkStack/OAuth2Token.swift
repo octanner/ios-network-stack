@@ -10,13 +10,13 @@ import Foundation
 import JaSON
 import SimpleKeychain
 
-struct OAuth2Token: JSONObjectConvertible {
+public struct OAuth2Token: JSONObjectConvertible {
 
     // MARK: - Public properties
     
-    let accessToken: String
-    let expiresAt: NSDate?
-    let refreshToken: String?
+    public let accessToken: String
+    public let expiresAt: NSDate?
+    public let refreshToken: String?
     
     
     // MARK: - Private properties
@@ -33,19 +33,19 @@ struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Initializers
     
-    init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
+    public init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
         self.accessToken = accessToken
         self.expiresAt = expiresAt
         self.refreshToken = refreshToken
     }
     
-    init(json: JSONObject) throws {
+    public init(json: JSONObject) throws {
         self.accessToken = try json <| accessTokenKey
         self.expiresAt = try json <| expiresAtKey
         self.refreshToken = try json <| refreshTokenKey
     }
 
-    init(key: String) throws {
+    public init(key: String) throws {
         let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(key)
         self.accessToken = try dictionary <| accessTokenKey
         let expiration = dictionary[expiresAtKey] as? NSDate
@@ -57,7 +57,7 @@ struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Public functions
 
-    func lock(key: String) throws {
+    public func lock(key: String) throws {
         let tokenValues: [String: AnyObject] = [
             accessTokenKey: accessToken,
             expiresAtKey: expiresAt ?? NSDate.distantFuture(),
@@ -66,7 +66,7 @@ struct OAuth2Token: JSONObjectConvertible {
         try OAuth2Token.keychain.set(tokenValues, forKey: key)
     }
 
-    static func delete(key: String) {
+    public static func delete(key: String) {
         OAuth2Token.keychain.deleteValue(forKey: key)
     }
 
