@@ -9,7 +9,7 @@
 import Foundation
 import JaSON
 
-protocol AppStateRepresentable {
+public protocol AppStateRepresentable {
     var accessToken: String? { get }
     var loggedIn: Bool { get }
     var networkPath: String { get }
@@ -17,11 +17,11 @@ protocol AppStateRepresentable {
     func deleteToken()
 }
 
-struct Network {
+public struct Network {
     
     // MARK: - Initializers
     
-    init(appState: AppStateRepresentable) {
+    public init(appState: AppStateRepresentable) {
         self.appState = appState
     }
     
@@ -40,7 +40,7 @@ struct Network {
     
     // MARK: - Public API
     
-    func logIn(username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) {
+    public func logIn(username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) {
         let parameters = [
             "grant_type": "password",
             "email": username,
@@ -69,11 +69,11 @@ struct Network {
         task.resume()
     }
     
-    func logOut() {
+    public func logOut() {
         appState.deleteToken()
     }
     
-    func GET(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func GET(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         if appState.accessToken == nil {
             // TODO: Force authentication
         }
@@ -85,7 +85,7 @@ struct Network {
         task.resume()
     }
     
-    func POST(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func POST(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         if appState.accessToken == nil {
             // TODO: Force authentication
         }
@@ -103,7 +103,7 @@ struct Network {
         task.resume()
     }
     
-    func PATCH(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func PATCH(endpoint: String, parameters: [String: String]?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         if appState.accessToken == nil {
             // TODO: Force authentication
         }
