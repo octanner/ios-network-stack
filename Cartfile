@@ -1,2 +1,2 @@
 github "bwhiteley/JaSON" "master"
-github "octanner/SimpleKeychain"
+github "octanner/SimpleKeychain" "master"
