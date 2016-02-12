@@ -45,6 +45,7 @@ public struct AuthAPIRequests: AuthRequests {
             "password": password
         ]
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
         configuration.timeoutIntervalForRequest = 10.0
         let session = NSURLSession(configuration: configuration)
         

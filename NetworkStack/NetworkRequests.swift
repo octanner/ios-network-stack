@@ -38,7 +38,7 @@ public struct NetworkAPIRequests: APIRequests {
     private var defaultSession: NSURLSession? {
         guard let accessToken = appState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["Accept": "application/json", "Authorization": "Bearer \(accessToken)"]
+        configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
         return NSURLSession(configuration: configuration)
     }

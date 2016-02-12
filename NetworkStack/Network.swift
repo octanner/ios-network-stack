@@ -81,8 +81,12 @@ private extension Network {
     }
     
     func parameterData(parameters: JSONObject?) -> NSData? {
-        if let queryItems = queryItems(parameters) {
-            return NSKeyedArchiver.archivedDataWithRootObject(queryItems)
+        if let parameters = parameters {
+            var adjustedParameters = [String: String]()
+            for (name, value) in parameters {
+                adjustedParameters[name] = String(value)
+            }
+            return try? NSJSONSerialization.dataWithJSONObject(adjustedParameters, options: [])
         }
         return nil
     }
