@@ -16,6 +16,7 @@
 		701762A51C6D2F54008D42C6 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A41C6D2F54008D42C6 /* Network.swift */; };
 		701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */; };
 		701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A81C6D2F64008D42C6 /* AuthRequests.swift */; };
+		704B1F451C6E579E008CC46D /* AppStateRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,7 @@
 		701762A41C6D2F54008D42C6 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
 		701762A81C6D2F64008D42C6 /* AuthRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthRequests.swift; sourceTree = "<group>"; };
+		704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateRepresentable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 			children = (
 				701762861C6D117D008D42C6 /* NetworkStack.h */,
 				701762A41C6D2F54008D42C6 /* Network.swift */,
+				704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */,
 				701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */,
 				701762A81C6D2F64008D42C6 /* AuthRequests.swift */,
 				701762A21C6D2F4B008D42C6 /* OAuth2Token.swift */,
@@ -227,6 +230,7 @@
 				701762A31C6D2F4B008D42C6 /* OAuth2Token.swift in Sources */,
 				701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */,
 				701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */,
+				704B1F451C6E579E008CC46D /* AppStateRepresentable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
