@@ -12,13 +12,13 @@ import JaSON
 
 // TODO: Bring functionality in here to construct the default session and pass it to Network, lowercase method names, add delete, add put, change parameters to [String: AnyObject]? (encode the value as a String) (look at Alamofire for examples of eventual encoding)
 
-public protocol APIRequests {
+public protocol NetworkRequests {
     func get(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
     func post(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
     func patch(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
 }
 
-public struct NetworkAPIRequests: APIRequests {
+public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Initializers
     
