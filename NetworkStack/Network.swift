@@ -21,6 +21,16 @@ public struct Network {
     }
     
     
+    // MARK: - Enums
+    
+    enum RequestType: String {
+        case POST
+        case PATCH
+        case PUT
+        case DELETE
+    }
+    
+    
     // MARK: - Public API
     
     public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
@@ -42,39 +52,41 @@ public struct Network {
     }
     
     public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = parameterData(parameters)
-        
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            let responseObject = self.parseResponse(data)
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(responseObject: responseObject, error: error)
-            }
-        }
-        task.resume()
+        performNetworkCall(.POST, url: url, session: session, parameters: parameters, completion: completion)
     }
     
     public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "PATCH"
-        request.HTTPBody = parameterData(parameters)
-        
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            let responseObject = self.parseResponse(data)
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(responseObject: responseObject, error: error)
-            }
-        }
-        task.resume()
+        performNetworkCall(.PATCH, url: url, session: session, parameters: parameters, completion: completion)
     }
-    
+
+    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+        performNetworkCall(.PUT, url: url, session: session, parameters: parameters, completion: completion)
+    }
+
+    public func delete(url: NSURL, session: NSURLSession, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+        performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
+    }
+
 }
 
 
 // MARK: - Private functions
 
 private extension Network {
+    
+    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = requestType.rawValue
+        request.HTTPBody = parameterData(parameters)
+        
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            let responseObject = self.parseResponse(data)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(responseObject: responseObject, error: error)
+            }
+        }
+        task.resume()
+    }
     
     func queryItems(parameters: JSONObject?) -> [NSURLQueryItem]? {
         if let parameters = parameters {
