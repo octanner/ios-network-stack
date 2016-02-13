@@ -9,6 +9,8 @@
 import Foundation
 import JaSON
 
+// TODO: Add basic error handling for HTML error codes
+
 public struct Network {
     
     // MARK: - Error
@@ -32,7 +34,9 @@ public struct Network {
         }
         let task = session.dataTaskWithURL(_url) { data, response, error in
             let responseObject = self.parseResponse(data)
-            completion(responseObject: responseObject, error: error)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(responseObject: responseObject, error: error)
+            }
         }
         task.resume()
     }
@@ -44,7 +48,9 @@ public struct Network {
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             let responseObject = self.parseResponse(data)
-            completion(responseObject: responseObject, error: error)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(responseObject: responseObject, error: error)
+            }
         }
         task.resume()
     }
@@ -56,7 +62,9 @@ public struct Network {
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             let responseObject = self.parseResponse(data)
-            completion(responseObject: responseObject, error: error)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(responseObject: responseObject, error: error)
+            }
         }
         task.resume()
     }
