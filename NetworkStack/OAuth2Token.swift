@@ -28,6 +28,7 @@ struct OAuth2Token: JSONObjectConvertible {
     
     private let accessTokenKey = "access_token"
     private let expiresAtKey = "expires_at"
+    private let expiresInKey = "expires_in"
     private let refreshTokenKey = "refresh_token"
     
     
@@ -41,7 +42,8 @@ struct OAuth2Token: JSONObjectConvertible {
     
     init(json: JSONObject) throws {
         self.accessToken = try json <| accessTokenKey
-        self.expiresAt = try json <| expiresAtKey
+        let expiresIn: NSTimeInterval = try json <| expiresInKey
+        self.expiresAt = NSDate(timeIntervalSinceNow: expiresIn)
         self.refreshToken = try json <| refreshTokenKey
     }
 
