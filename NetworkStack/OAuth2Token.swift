@@ -10,13 +10,13 @@ import Foundation
 import JaSON
 import SimpleKeychain
 
-public struct OAuth2Token: JSONObjectConvertible {
+struct OAuth2Token: JSONObjectConvertible {
 
     // MARK: - Public properties
     
-    public let accessToken: String
-    public let expiresAt: NSDate?
-    public let refreshToken: String?
+    let accessToken: String
+    let expiresAt: NSDate?
+    let refreshToken: String?
     
     
     // MARK: - Private properties
@@ -33,20 +33,20 @@ public struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Initializers
     
-    public init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
+    init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
         self.accessToken = accessToken
         self.expiresAt = expiresAt
         self.refreshToken = refreshToken
     }
     
-    public init(json: JSONObject) throws {
+    init(json: JSONObject) throws {
         self.accessToken = try json <| accessTokenKey
         self.expiresAt = try json <| expiresAtKey
         self.refreshToken = try json <| refreshTokenKey
     }
 
-    public init(key: String) throws {
-        let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(key)
+    init(key: String) throws {
+        let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
         self.accessToken = try dictionary <| accessTokenKey
         let expiration = dictionary[expiresAtKey] as? NSDate
         self.expiresAt = expiration == NSDate.distantFuture() ? nil : expiration
@@ -57,17 +57,24 @@ public struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Public functions
 
-    public func lock(key: String) throws {
+    func lock(key: String) throws {
         let tokenValues: [String: AnyObject] = [
             accessTokenKey: accessToken,
             expiresAtKey: expiresAt ?? NSDate.distantFuture(),
             refreshTokenKey: refreshToken ?? ""
         ]
-        try OAuth2Token.keychain.set(tokenValues, forKey: key)
+        try OAuth2Token.keychain.set(tokenValues, forKey: OAuth2Token.tokenKey(key))
     }
 
-    public static func delete(key: String) {
-        OAuth2Token.keychain.deleteValue(forKey: key)
+    static func delete(key: String) {
+        OAuth2Token.keychain.deleteValue(forKey: tokenKey(key))
+    }
+
+
+    // MARK: - Private helper functions
+
+    private static func tokenKey(key: String) -> String {
+        return "\(key).token"
     }
 
 }

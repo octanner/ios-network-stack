@@ -7,41 +7,31 @@
 //
 
 import Foundation
+import JaSON
 
 
 // TODO: This should just call network for something like login and construct the session and pass the URL in
 
 public protocol AuthRequests {
-    func logIn(endpoint endpoint: String, username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) throws
+    func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
     func logOut()
 }
 
 public struct AuthAPIRequests: AuthRequests {
-    
-    // MARK: - Initializers
-    
-    public init(appState: AppStateRepresentable) {
-        self.appState = appState
-    }
-    
     
     // MARK: - Internal properties
     
     var network = Network()
     
     
-    // MARK: - Private properties
-    
-    private let appState: AppStateRepresentable
-    
-    
     // MARK: - Public API
     
-    public func logIn(endpoint endpoint: String, username: String, password: String, completion: (success: Bool, error: ErrorType?) -> Void) throws {
-        guard let url = NSURL(string: appState.networkPath + endpoint) else { throw Network.Error.InvalidEndpoint }
+    public func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+        guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.InvalidEndpoint }
+        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.InvalidEndpoint }
         let parameters = [
             "grant_type": "password",
-            "email": username,
+            "username": username,
             "password": password
         ]
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
@@ -49,22 +39,23 @@ public struct AuthAPIRequests: AuthRequests {
         configuration.timeoutIntervalForRequest = 10.0
         let session = NSURLSession(configuration: configuration)
         
-        network.post(url, session: session, parameters: parameters, completion: { responseObject, networkError in
+        network.post(url, session: session, parameters: parameters) { responseObject, networkError in
             if let responseObject = responseObject {
                 do {
-                    try self.appState.saveToken(responseObject)
-                    completion(success: true, error: nil)
+                    try appNetworkState.saveToken(responseObject)
+                    completion(responseObject: responseObject, error: nil)
                 } catch {
-                    completion(success: false, error: error)
+                    completion(responseObject: nil, error: error)
                 }
             } else {
-                completion(success: false, error: networkError)
+                completion(responseObject: nil, error: networkError)
             }
-        })
+        }
     }
     
     public func logOut() {
-        appState.deleteToken()
+        guard let appNetworkState = AppNetworkState.currentAppState else { return }
+        appNetworkState.deleteToken()
     }
 
 }
