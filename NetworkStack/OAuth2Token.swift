@@ -12,6 +12,13 @@ import SimpleKeychain
 
 struct OAuth2Token: JSONObjectConvertible {
 
+    // MARK: - Error
+
+    enum Error: ErrorType {
+        case TypeMismatch
+    }
+
+
     // MARK: - Public properties
     
     let accessToken: String
@@ -49,9 +56,13 @@ struct OAuth2Token: JSONObjectConvertible {
 
     init(key: String) throws {
         let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
-        self.accessToken = try dictionary <| accessTokenKey
-        self.expiresAt = try dictionary <| expiresAtKey
-        let refresh: String = try dictionary <| refreshTokenKey
+
+        guard let accessToken = dictionary[accessTokenKey] as? String else { throw Error.TypeMismatch }
+        guard let expiresAt = dictionary[expiresAtKey] as? NSDate else { throw Error.TypeMismatch }
+        guard let refresh = dictionary[refreshTokenKey] as? String else { throw Error.TypeMismatch }
+
+        self.accessToken = accessToken
+        self.expiresAt = expiresAt
         self.refreshToken = refresh == "" ? nil : refresh
     }
     

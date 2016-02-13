@@ -38,9 +38,13 @@ public struct AppNetworkState {
     // MARK: - Internal helper functions
 
     var accessToken: String? {
-        guard let token = try? OAuth2Token(key: environmentKey) else { return nil }
-        if NSDate().compare(token.expiresAt) == .OrderedAscending {
-            return token.accessToken
+        do {
+            let token = try OAuth2Token(key: environmentKey)
+            if NSDate().compare(token.expiresAt) == .OrderedAscending {
+                return token.accessToken
+            }
+        } catch {
+            print(error)
         }
         return nil
     }

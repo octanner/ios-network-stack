@@ -35,7 +35,7 @@ public struct Network {
     
     public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
         let _url: NSURL
-        let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: false)
+        let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems(parameters)
         if let componentURL = components?.URL {
             _url = componentURL
