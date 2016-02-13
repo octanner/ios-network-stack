@@ -18,6 +18,13 @@ public protocol AuthRequests {
 }
 
 public struct AuthAPIRequests: AuthRequests {
+
+    // MARK: - Public initializer
+
+    public init() {
+
+    }
+
     
     // MARK: - Internal properties
     

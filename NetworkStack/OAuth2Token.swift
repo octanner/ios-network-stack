@@ -15,7 +15,7 @@ struct OAuth2Token: JSONObjectConvertible {
     // MARK: - Public properties
     
     let accessToken: String
-    let expiresAt: NSDate?
+    let expiresAt: NSDate
     let refreshToken: String?
     
     
@@ -35,7 +35,7 @@ struct OAuth2Token: JSONObjectConvertible {
     
     init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
         self.accessToken = accessToken
-        self.expiresAt = expiresAt
+        self.expiresAt = expiresAt ?? NSDate.distantFuture()
         self.refreshToken = refreshToken
     }
     
@@ -48,8 +48,7 @@ struct OAuth2Token: JSONObjectConvertible {
     init(key: String) throws {
         let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
         self.accessToken = try dictionary <| accessTokenKey
-        let expiration = dictionary[expiresAtKey] as? NSDate
-        self.expiresAt = expiration == NSDate.distantFuture() ? nil : expiration
+        self.expiresAt = try dictionary <| expiresAtKey
         let refresh: String = try dictionary <| refreshTokenKey
         self.refreshToken = refresh == "" ? nil : refresh
     }
@@ -60,7 +59,7 @@ struct OAuth2Token: JSONObjectConvertible {
     func lock(key: String) throws {
         let tokenValues: [String: AnyObject] = [
             accessTokenKey: accessToken,
-            expiresAtKey: expiresAt ?? NSDate.distantFuture(),
+            expiresAtKey: expiresAt,
             refreshTokenKey: refreshToken ?? ""
         ]
         try OAuth2Token.keychain.set(tokenValues, forKey: OAuth2Token.tokenKey(key))

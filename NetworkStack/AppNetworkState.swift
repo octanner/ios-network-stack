@@ -25,10 +25,24 @@ public struct AppNetworkState {
     public let transientState: Bool
 
 
+    // MARK: - Initializers
+
+    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, transientState: Bool = false) {
+        self.apiURLString = apiURLString
+        self.tokenEndpointURLString = tokenEndpointURLString
+        self.environmentKey = environmentKey
+        self.transientState = transientState
+    }
+
+
     // MARK: - Internal helper functions
 
-    var authToken: OAuth2Token? {
-        return try? OAuth2Token(key: environmentKey)
+    var accessToken: String? {
+        guard let token = try? OAuth2Token(key: environmentKey) else { return nil }
+        if NSDate().compare(token.expiresAt) == .OrderedAscending {
+            return token.accessToken
+        }
+        return nil
     }
 
     func urlForEndpoint(endpoint: String) -> NSURL? {

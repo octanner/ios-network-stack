@@ -18,6 +18,12 @@ public protocol NetworkRequests {
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
+
+    // MARK: - Public initializer
+
+    public init() {
+    }
+
     
     // MARK: - Internal properties
     
@@ -28,9 +34,9 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     private var defaultSession: NSURLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
-        guard let authToken = appNetworkState.authToken else { return nil }
+        guard let accessToken = appNetworkState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(authToken.accessToken)"]
+        configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
         return NSURLSession(configuration: configuration)
     }
