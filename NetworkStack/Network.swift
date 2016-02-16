@@ -15,10 +15,21 @@ public struct Network {
     
     // MARK: - Error
     
-    public enum Error: ErrorType {
+    public enum Error: ErrorType, CustomStringConvertible {
         case AuthenticationRequired
         case InvalidEndpoint
         case MissingAppNetworkState
+        
+        public var description: String {
+            switch self {
+            case .AuthenticationRequired:
+                return "You must authenticate to continue."
+            case .InvalidEndpoint:
+                return "The endpoint you are trying to access is not valid."
+            case .MissingAppNetworkState:
+                return "The app environment is not configured correctly."
+            }
+        }
     }
     
     

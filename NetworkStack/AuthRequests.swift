@@ -9,9 +9,6 @@
 import Foundation
 import JaSON
 
-
-// TODO: This should just call network for something like login and construct the session and pass the URL in
-
 public protocol AuthRequests {
     func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
     func logOut()
