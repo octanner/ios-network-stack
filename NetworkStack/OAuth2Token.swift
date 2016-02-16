@@ -82,10 +82,14 @@ struct OAuth2Token: JSONObjectConvertible {
         OAuth2Token.keychain.deleteValue(forKey: tokenKey(key))
     }
 
+}
 
-    // MARK: - Private helper functions
 
-    private static func tokenKey(key: String) -> String {
+// MARK: - Private helper functions
+
+private extension OAuth2Token {
+
+    static func tokenKey(key: String) -> String {
         return "\(key).token"
     }
 
