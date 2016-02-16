@@ -49,6 +49,10 @@ public struct AppNetworkState {
     public let apiURLString: String
     public let tokenEndpointURLString: String
     public let environmentKey: String
+    public static var loggedIn: Bool {
+        guard let currentAppState = currentAppState else { return false }
+        return currentAppState.accessToken != nil
+    }
     
     
     // MARK: - Constants
