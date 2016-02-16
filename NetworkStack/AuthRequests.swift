@@ -21,9 +21,7 @@ public struct AuthAPIRequests: AuthRequests {
 
     // MARK: - Public initializer
 
-    public init() {
-
-    }
+    public init() { }
 
     
     // MARK: - Internal properties

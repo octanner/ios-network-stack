@@ -21,8 +21,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     // MARK: - Public initializer
 
-    public init() {
-    }
+    public init() { }
 
     
     // MARK: - Internal properties
