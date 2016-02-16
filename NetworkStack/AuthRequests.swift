@@ -33,7 +33,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     public func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
         guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.MissingAppNetworkState }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.InvalidEndpoint }
+        guard let url = appNetworkState.urlForEndpoint(appNetworkState.tokenEndpointURLString) else { throw Network.Error.InvalidEndpoint }
         let parameters = [
             "grant_type": "password",
             "username": username,
