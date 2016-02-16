@@ -62,10 +62,10 @@ public struct AppNetworkState {
     
     // MARK: - Constants
 
-    private static let apiURLStringKey = "apiURLString"
-    private static let tokenEndpointURLStringKey = "tokenEndpointURLString"
-    private static let environmentKeyKey = "environmentKey"
-    private static let appNetworkStateKey = "appNetworkState"
+    private static let apiURLStringKey = "NetworkStack.apiURLString"
+    private static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
+    private static let environmentKeyKey = "NetworkStack.environmentKey"
+    private static let appNetworkStateKey = "NetworkStack.appNetworkState"
     
 
     // MARK: - Initializers
