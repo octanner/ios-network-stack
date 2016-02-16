@@ -23,13 +23,13 @@ public struct AppNetworkState {
 
     public static var currentAppState: AppNetworkState? {
         get {
-            if let currentAppState = self.currentAppState {
-                return currentAppState
+            if let currentState = savedCurrentAppState {
+                return currentState
             }
             if let dictionary = NSUserDefaults.standardUserDefaults().objectForKey(AppNetworkState.appNetworkStateKey) as? [String: AnyObject] {
                 do {
                     let state = try AppNetworkState(dictionary: dictionary)
-                    self.currentAppState = state
+                    savedCurrentAppState = state
                     return state
                 } catch {
                     return nil
@@ -38,7 +38,7 @@ public struct AppNetworkState {
             return nil
         }
         set {
-            self.currentAppState = newValue
+            savedCurrentAppState = newValue
             persistState()
         }
     }
@@ -53,6 +53,11 @@ public struct AppNetworkState {
         guard let currentAppState = currentAppState else { return false }
         return currentAppState.accessToken != nil
     }
+    
+    
+    // MARK: - Private shared instance
+    
+    private static var savedCurrentAppState: AppNetworkState?
     
     
     // MARK: - Constants
@@ -125,11 +130,11 @@ extension AppNetworkState {
 private extension AppNetworkState {
 
     static func persistState() {
-        guard let currentAppState = currentAppState else { return }
+        guard let currentState = savedCurrentAppState else { return }
         var dictionary = [String: AnyObject]()
-        dictionary[apiURLStringKey] = currentAppState.apiURLString
-        dictionary[tokenEndpointURLStringKey] = currentAppState.tokenEndpointURLString
-        dictionary[environmentKeyKey] = currentAppState.environmentKey
+        dictionary[apiURLStringKey] = currentState.apiURLString
+        dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
+        dictionary[environmentKeyKey] = currentState.environmentKey
         
         NSUserDefaults.standardUserDefaults().setObject(dictionary, forKey: appNetworkStateKey)
     }
