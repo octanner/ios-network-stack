@@ -29,7 +29,7 @@ public struct Network {
             case .AuthenticationRequired:
                 return "Hold up! Log in to continue."
             case .InvalidEndpoint:
-                return "Oops. Your request made no sense.."
+                return "Oops. Your request made no sense."
             case .MissingAppNetworkState:
                 return "What the!? How did you even get here?"
             case .ResponseNotValidHTTP:
@@ -103,30 +103,30 @@ private extension Network {
         request.HTTPBody = parameterData(parameters)
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
-            if let response = response as? NSHTTPURLResponse {
-                if case let status = response.statusCode where status >= 200 && status < 300 {
-                    let responseObject = self.parseResponse(data)
-                    self.finalizeNetworkCall(responseObject: responseObject, error: error, completion: completion)
-                } else {
-                    var customNetworkError: Error?
-                    let status = response.statusCode
-                    if status == 500 {
-                        customNetworkError = .Status500
-                    } else if status == 404 {
-                        customNetworkError = .Status404
-                    } else if status == 403 {
-                        customNetworkError = .Status403
-                    } else if status == 401 {
-                        customNetworkError = .AuthenticationRequired
-                    } else if status == 400 {
-                        customNetworkError = .Status400
-                    } else if error == nil {
-                        customNetworkError = .UnknownNetworkError(status: status)
-                    }
-                    self.finalizeNetworkCall(responseObject: nil, error: customNetworkError ?? error, completion: completion)
-                }
-            } else {
+            guard let response = response as? NSHTTPURLResponse else {
                 self.finalizeNetworkCall(responseObject: nil, error: Error.ResponseNotValidHTTP, completion: completion)
+                return
+            }
+            if case let status = response.statusCode where status >= 200 && status < 300 {
+                let responseObject = self.parseResponse(data)
+                self.finalizeNetworkCall(responseObject: responseObject, error: error, completion: completion)
+            } else {
+                var customNetworkError: Error?
+                let status = response.statusCode
+                if status == 500 {
+                    customNetworkError = .Status500
+                } else if status == 404 {
+                    customNetworkError = .Status404
+                } else if status == 403 {
+                    customNetworkError = .Status403
+                } else if status == 401 {
+                    customNetworkError = .AuthenticationRequired
+                } else if status == 400 {
+                    customNetworkError = .Status400
+                } else if error == nil {
+                    customNetworkError = .UnknownNetworkError(status: status)
+                }
+                self.finalizeNetworkCall(responseObject: nil, error: customNetworkError ?? error, completion: completion)
             }
         }
         task.resume()
