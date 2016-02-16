@@ -18,13 +18,11 @@ public protocol NetworkRequests {
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
-    
-    // MARK: - Initializers
-    
-    public init(appState: AppStateRepresentable) {
-        self.appState = appState
-    }
-    
+
+    // MARK: - Public initializer
+
+    public init() { }
+
     
     // MARK: - Internal properties
     
@@ -33,9 +31,9 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Private properties
     
-    private let appState: AppStateRepresentable
     private var defaultSession: NSURLSession? {
-        guard let accessToken = appState.accessToken else { return nil }
+        guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
+        guard let accessToken = appNetworkState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
@@ -78,8 +76,9 @@ public struct NetworkAPIRequests: NetworkRequests {
 private extension NetworkAPIRequests {
     
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
+        guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.MissingAppNetworkState }
         guard let session = defaultSession else { throw Network.Error.AuthenticationRequired }
-        guard let url = NSURL(string: appState.networkPath + endpoint) else { throw Network.Error.InvalidEndpoint }
+        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.InvalidEndpoint }
         return (session, url)
     }
     

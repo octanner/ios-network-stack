@@ -16,7 +16,7 @@
 		701762A51C6D2F54008D42C6 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A41C6D2F54008D42C6 /* Network.swift */; };
 		701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */; };
 		701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A81C6D2F64008D42C6 /* AuthRequests.swift */; };
-		704B1F451C6E579E008CC46D /* AppStateRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */; };
+		B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,7 +42,7 @@
 		701762A41C6D2F54008D42C6 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
 		701762A81C6D2F64008D42C6 /* AuthRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthRequests.swift; sourceTree = "<group>"; };
-		704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateRepresentable.swift; sourceTree = "<group>"; };
+		B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNetworkState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +89,7 @@
 			children = (
 				701762861C6D117D008D42C6 /* NetworkStack.h */,
 				701762A41C6D2F54008D42C6 /* Network.swift */,
-				704B1F441C6E579E008CC46D /* AppStateRepresentable.swift */,
+				B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */,
 				701762A61C6D2F5F008D42C6 /* NetworkRequests.swift */,
 				701762A81C6D2F64008D42C6 /* AuthRequests.swift */,
 				701762A21C6D2F4B008D42C6 /* OAuth2Token.swift */,
@@ -228,9 +228,9 @@
 			files = (
 				701762A51C6D2F54008D42C6 /* Network.swift in Sources */,
 				701762A31C6D2F4B008D42C6 /* OAuth2Token.swift in Sources */,
+				B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */,
 				701762A71C6D2F5F008D42C6 /* NetworkRequests.swift in Sources */,
 				701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */,
-				704B1F451C6E579E008CC46D /* AppStateRepresentable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,7 +291,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -334,7 +334,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -353,11 +353,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/JaSON/build/Debug-iphoneos",
-					"$(PROJECT_DIR)/Carthage/Checkouts/SimpleKeychain/build/Debug-iphoneos",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = NetworkStack/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -378,11 +374,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/JaSON/build/Debug-iphoneos",
-					"$(PROJECT_DIR)/Carthage/Checkouts/SimpleKeychain/build/Debug-iphoneos",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = NetworkStack/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
