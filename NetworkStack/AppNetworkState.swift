@@ -11,10 +11,37 @@ import JaSON
 
 
 public struct AppNetworkState {
+    
+    // MARK: - Error
+    
+    enum Error: ErrorType {
+        case TypeMismatch
+    }
+    
 
     // MARK: - Shared instance
 
-    public static var currentAppState: AppNetworkState?
+    public static var currentAppState: AppNetworkState? {
+        get {
+            if let currentAppState = self.currentAppState {
+                return currentAppState
+            }
+            if let dictionary = NSUserDefaults.standardUserDefaults().objectForKey(AppNetworkState.appNetworkStateKey) as? [String: AnyObject] {
+                do {
+                    let state = try AppNetworkState(dictionary: dictionary)
+                    self.currentAppState = state
+                    return state
+                } catch {
+                    return nil
+                }
+            }
+            return nil
+        }
+        set {
+            self.currentAppState = newValue
+            persistState()
+        }
+    }
 
 
     // MARK: - Public properties
@@ -22,16 +49,32 @@ public struct AppNetworkState {
     public let apiURLString: String
     public let tokenEndpointURLString: String
     public let environmentKey: String
-    public let transientState: Bool
+    
+    
+    // MARK: - Constants
 
+    private static let apiURLStringKey = "apiURLString"
+    private static let tokenEndpointURLStringKey = "tokenEndpointURLString"
+    private static let environmentKeyKey = "environmentKey"
+    private static let appNetworkStateKey = "appNetworkState"
+    
 
     // MARK: - Initializers
 
-    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, transientState: Bool = false) {
+    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String) {
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
-        self.transientState = transientState
+    }
+    
+    init(dictionary: [String: AnyObject]) throws {
+        guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw Error.TypeMismatch }
+        guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw Error.TypeMismatch }
+        guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw Error.TypeMismatch }
+        
+        self.apiURLString = apiURLString
+        self.tokenEndpointURLString = tokenEndpointURLString
+        self.environmentKey = environmentKey
     }
 
 
@@ -70,4 +113,21 @@ extension AppNetworkState {
         OAuth2Token.delete(environmentKey)
     }
 
+}
+
+
+// MARK: - Private functions
+
+private extension AppNetworkState {
+
+    static func persistState() {
+        guard let currentAppState = currentAppState else { return }
+        var dictionary = [String: AnyObject]()
+        dictionary[apiURLStringKey] = currentAppState.apiURLString
+        dictionary[tokenEndpointURLStringKey] = currentAppState.tokenEndpointURLString
+        dictionary[environmentKeyKey] = currentAppState.environmentKey
+        
+        NSUserDefaults.standardUserDefaults().setObject(dictionary, forKey: appNetworkStateKey)
+    }
+    
 }
