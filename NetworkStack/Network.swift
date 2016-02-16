@@ -15,9 +15,10 @@ public struct Network {
     
     // MARK: - Error
     
-    enum Error: ErrorType {
+    public enum Error: ErrorType {
         case AuthenticationRequired
         case InvalidEndpoint
+        case MissingAppNetworkState
     }
     
     
