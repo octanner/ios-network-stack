@@ -35,7 +35,7 @@ public struct AppNetworkState {
     }
 
 
-    // MARK: - Internal helper functions
+    // MARK: - Internal properties
 
     var accessToken: String? {
         do {
@@ -48,6 +48,13 @@ public struct AppNetworkState {
         }
         return nil
     }
+    
+}
+
+
+// MARK: - Internal helper functions
+
+extension AppNetworkState {
 
     func urlForEndpoint(endpoint: String) -> NSURL? {
         guard let baseURL = NSURL(string: apiURLString) else { return nil }
