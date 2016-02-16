@@ -9,8 +9,6 @@
 import Foundation
 import JaSON
 
-// TODO: Add basic error handling for HTML error codes
-
 public struct Network {
     
     // MARK: - Error
@@ -19,15 +17,33 @@ public struct Network {
         case AuthenticationRequired
         case InvalidEndpoint
         case MissingAppNetworkState
+        case ResponseNotValidHTTP
+        case Status500
+        case Status404
+        case Status403
+        case Status400
+        case UnknownNetworkError(status: Int)
         
         public var description: String {
             switch self {
             case .AuthenticationRequired:
-                return "You must authenticate to continue."
+                return "Hold up! Log in to continue."
             case .InvalidEndpoint:
-                return "The endpoint you are trying to access is not valid."
+                return "Oops. Your request made no sense.."
             case .MissingAppNetworkState:
-                return "The app environment is not configured correctly."
+                return "What the!? How did you even get here?"
+            case .ResponseNotValidHTTP:
+                return "Yikes. The server’s talking back to you."
+            case .Status500:
+                return "Ugh. Internal server error. (Code 500)"
+            case .Status404:
+                return "Uh oh. There’s nothing here. (Code 404)"
+            case .Status403:
+                return "Ah ah ah. You don’t have access. (Code 403)"
+            case .Status400:
+                return "Oops. Your request made no sense. (Code 400)"
+            case .UnknownNetworkError(let status):
+                return "Hmm. Something’s wrong. (Code \(status))"
             }
         }
     }
@@ -36,6 +52,7 @@ public struct Network {
     // MARK: - Enums
     
     enum RequestType: String {
+        case GET
         case POST
         case PATCH
         case PUT
@@ -54,13 +71,7 @@ public struct Network {
         } else {
             _url = url
         }
-        let task = session.dataTaskWithURL(_url) { data, response, error in
-            let responseObject = self.parseResponse(data)
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(responseObject: responseObject, error: error)
-            }
-        }
-        task.resume()
+        performNetworkCall(.GET, url: _url, session: session, parameters: nil, completion: completion)
     }
     
     public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
@@ -92,12 +103,39 @@ private extension Network {
         request.HTTPBody = parameterData(parameters)
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
-            let responseObject = self.parseResponse(data)
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(responseObject: responseObject, error: error)
+            if let response = response as? NSHTTPURLResponse {
+                if case let status = response.statusCode where status >= 200 && status < 300 {
+                    let responseObject = self.parseResponse(data)
+                    self.finalizeNetworkCall(responseObject: responseObject, error: error, completion: completion)
+                } else {
+                    var customNetworkError: Error?
+                    let status = response.statusCode
+                    if status == 500 {
+                        customNetworkError = .Status500
+                    } else if status == 404 {
+                        customNetworkError = .Status404
+                    } else if status == 403 {
+                        customNetworkError = .Status403
+                    } else if status == 401 {
+                        customNetworkError = .AuthenticationRequired
+                    } else if status == 400 {
+                        customNetworkError = .Status400
+                    } else if error == nil {
+                        customNetworkError = .UnknownNetworkError(status: status)
+                    }
+                    self.finalizeNetworkCall(responseObject: nil, error: customNetworkError ?? error, completion: completion)
+                }
+            } else {
+                self.finalizeNetworkCall(responseObject: nil, error: Error.ResponseNotValidHTTP, completion: completion)
             }
         }
         task.resume()
+    }
+    
+    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+        dispatch_async(dispatch_get_main_queue()) {
+            completion(responseObject: responseObject, error: error)
+        }
     }
     
     func queryItems(parameters: JSONObject?) -> [NSURLQueryItem]? {
