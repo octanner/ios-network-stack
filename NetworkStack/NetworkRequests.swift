@@ -10,11 +10,11 @@ import Foundation
 import JaSON
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func post(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func patch(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func put(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func delete(endpoint: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
+    func get(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws
+    func post(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws
+    func patch(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws
+    func put(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws
+    func delete(endpoint: String, completion: NetworkResponseCompletion) throws
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -43,27 +43,27 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func get(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.get(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func post(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func post(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.post(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func patch(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func patch(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.patch(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func put(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func put(endpoint: String, parameters: JSONObject?, completion: NetworkResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.put(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func delete(endpoint: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func delete(endpoint: String, completion: NetworkResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.delete(url, session: session, completion: completion)
     }

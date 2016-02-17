@@ -9,6 +9,8 @@
 import Foundation
 import JaSON
 
+public typealias NetworkResponseCompletion = (responseObject: JSONObject?, error: ErrorType?) -> Void
+
 public struct Network {
     
     // MARK: - Error
@@ -62,7 +64,7 @@ public struct Network {
     
     // MARK: - Public API
     
-    public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: NetworkResponseCompletion) {
         let _url: NSURL
         let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems(parameters)
@@ -74,19 +76,19 @@ public struct Network {
         performNetworkCall(.GET, url: _url, session: session, parameters: nil, completion: completion)
     }
     
-    public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: NetworkResponseCompletion) {
         performNetworkCall(.POST, url: url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: NetworkResponseCompletion) {
         performNetworkCall(.PATCH, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: NetworkResponseCompletion) {
         performNetworkCall(.PUT, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func delete(url: NSURL, session: NSURLSession, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func delete(url: NSURL, session: NSURLSession, completion: NetworkResponseCompletion) {
         performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
     }
 
@@ -97,7 +99,7 @@ public struct Network {
 
 private extension Network {
     
-    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: NetworkResponseCompletion) {
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = requestType.rawValue
         request.HTTPBody = parameterData(parameters)
@@ -132,7 +134,7 @@ private extension Network {
         task.resume()
     }
     
-    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: NetworkResponseCompletion) {
         dispatch_async(dispatch_get_main_queue()) {
             completion(responseObject: responseObject, error: error)
         }
