@@ -11,41 +11,39 @@ import JaSON
 
 public typealias NetworkResponseCompletion = (responseObject: JSONObject?, error: ErrorType?) -> Void
 
+private let KnownStatusCodes = [
+    400: "Bad Request",
+    401: "Authentication Required",
+    403: "Forbidden",
+    404: "Not Found",
+    500: "Internal Server Error",
+]
+
 public struct Network {
     
     // MARK: - Error
     
     public enum Error: ErrorType, CustomStringConvertible {
-        case AuthenticationRequired
         case InvalidEndpoint(endpoint: String)
         case MissingAppNetworkState
         case ResponseNotValidHTTP
-        case Status500
-        case Status404
-        case Status403
-        case Status400
-        case UnknownNetworkError(status: Int)
+        case Status(status: Int)
         
         public var description: String {
             switch self {
-            case .AuthenticationRequired:
-                return "Not authenticated. Must be logged in."
             case .InvalidEndpoint(let endpoint):
                 return "Invalid endpoint: \(endpoint)"
             case .MissingAppNetworkState:
                 return "No current network state. Make sure AppNetworkState.currentAppState is set."
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
-            case .Status500:
-                return "500 Internal Server Error"
-            case .Status404:
-                return "404 Not Found"
-            case .Status403:
-                return "403 Forbidden"
-            case .Status400:
-                return "400 Bad Request"
-            case .UnknownNetworkError(let status):
-                return "Unknown Network Error. Status: \(status))"
+            case .Status(let status):
+                if let errorMessage = KnownStatusCodes[status] {
+                    return "\(status) \(errorMessage)"
+                }
+                else {
+                    return "Unknown Network Error. Status: \(status))"
+                }
             }
         }
     }
@@ -111,24 +109,10 @@ private extension Network {
             }
             if case let status = response.statusCode where status >= 200 && status < 300 {
                 let responseObject = self.parseResponse(data)
-                self.finalizeNetworkCall(responseObject: responseObject, error: error, completion: completion)
+                self.finalizeNetworkCall(responseObject: responseObject, error: nil, completion: completion)
             } else {
-                var customNetworkError: Error?
-                let status = response.statusCode
-                if status == 500 {
-                    customNetworkError = .Status500
-                } else if status == 404 {
-                    customNetworkError = .Status404
-                } else if status == 403 {
-                    customNetworkError = .Status403
-                } else if status == 401 {
-                    customNetworkError = .AuthenticationRequired
-                } else if status == 400 {
-                    customNetworkError = .Status400
-                } else if error == nil {
-                    customNetworkError = .UnknownNetworkError(status: status)
-                }
-                self.finalizeNetworkCall(responseObject: nil, error: customNetworkError ?? error, completion: completion)
+                let networkError = Error.Status(status: response.statusCode)
+                self.finalizeNetworkCall(responseObject: nil, error: networkError, completion: completion)
             }
         }
         task.resume()
