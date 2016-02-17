@@ -11,7 +11,7 @@ import JaSON
 
 public typealias NetworkResponseCompletion = (responseObject: JSONObject?, error: ErrorType?) -> Void
 
-private let KnownStatusCodes = [
+private let KnownErrorStatusCodes = [
     400: "Bad Request",
     401: "Authentication Required",
     403: "Forbidden",
@@ -38,7 +38,7 @@ public struct Network {
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
             case .Status(let status):
-                if let errorMessage = KnownStatusCodes[status] {
+                if let errorMessage = KnownErrorStatusCodes[status] {
                     return "\(status) \(errorMessage)"
                 }
                 else {
