@@ -24,14 +24,20 @@ public struct Network {
     // MARK: - Error
     
     public enum Error: ErrorType, CustomStringConvertible {
-        case InvalidEndpoint(endpoint: String)
+        
+        /// Attempted to request an malformed API endpoint
+        case MalformedEndpoint(endpoint: String)
+        
+        /// Recieved an invalid response from the server.
         case ResponseNotValidHTTP
+        
+        /// HTTP Error status code
         case Status(status: Int)
         
         public var description: String {
             switch self {
-            case .InvalidEndpoint(let endpoint):
-                return "Invalid endpoint: \(endpoint)"
+            case .MalformedEndpoint(let endpoint):
+                return "Attempted to request an malformed API endpoint: \(endpoint)"
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
             case .Status(let status):
