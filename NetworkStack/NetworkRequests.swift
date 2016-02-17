@@ -78,7 +78,7 @@ private extension NetworkAPIRequests {
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.MissingAppNetworkState }
         guard let session = defaultSession else { throw Network.Error.AuthenticationRequired }
-        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.InvalidEndpoint }
+        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.InvalidEndpoint(endpoint: endpoint) }
         return (session, url)
     }
     

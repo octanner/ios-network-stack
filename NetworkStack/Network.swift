@@ -17,7 +17,7 @@ public struct Network {
     
     public enum Error: ErrorType, CustomStringConvertible {
         case AuthenticationRequired
-        case InvalidEndpoint
+        case InvalidEndpoint(endpoint: String)
         case MissingAppNetworkState
         case ResponseNotValidHTTP
         case Status500
@@ -29,23 +29,23 @@ public struct Network {
         public var description: String {
             switch self {
             case .AuthenticationRequired:
-                return "Hold up! Log in to continue."
-            case .InvalidEndpoint:
-                return "Oops. Your request made no sense."
+                return "Not authenticated. Must be logged in."
+            case .InvalidEndpoint(let endpoint):
+                return "Invalid endpoint: \(endpoint)"
             case .MissingAppNetworkState:
-                return "What the!? How did you even get here?"
+                return "No current network state. Make sure AppNetworkState.currentAppState is set."
             case .ResponseNotValidHTTP:
-                return "Yikes. The server’s talking back to you."
+                return "Response was not an HTTP Response."
             case .Status500:
-                return "Ugh. Internal server error. (Code 500)"
+                return "500 Internal Server Error"
             case .Status404:
-                return "Uh oh. There’s nothing here. (Code 404)"
+                return "404 Not Found"
             case .Status403:
-                return "Ah ah ah. You don’t have access. (Code 403)"
+                return "403 Forbidden"
             case .Status400:
-                return "Oops. Your request made no sense. (Code 400)"
+                return "400 Bad Request"
             case .UnknownNetworkError(let status):
-                return "Hmm. Something’s wrong. (Code \(status))"
+                return "Unknown Network Error. Status: \(status))"
             }
         }
     }
