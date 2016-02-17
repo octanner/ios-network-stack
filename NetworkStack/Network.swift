@@ -25,7 +25,6 @@ public struct Network {
     
     public enum Error: ErrorType, CustomStringConvertible {
         case InvalidEndpoint(endpoint: String)
-        case MissingAppNetworkState
         case ResponseNotValidHTTP
         case Status(status: Int)
         
@@ -33,8 +32,6 @@ public struct Network {
             switch self {
             case .InvalidEndpoint(let endpoint):
                 return "Invalid endpoint: \(endpoint)"
-            case .MissingAppNetworkState:
-                return "No current network state. Make sure AppNetworkState.currentAppState is set."
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
             case .Status(let status):
