@@ -25,7 +25,7 @@ public struct Network {
     
     public enum Error: ErrorType, CustomStringConvertible {
         
-        /// Attempted to request an malformed API endpoint
+        /// Attempted to request a malformed API endpoint
         case MalformedEndpoint(endpoint: String)
         
         /// Recieved an invalid response from the server.
@@ -37,7 +37,7 @@ public struct Network {
         public var description: String {
             switch self {
             case .MalformedEndpoint(let endpoint):
-                return "Attempted to request an malformed API endpoint: \(endpoint)"
+                return "Attempted to request a malformed API endpoint: \(endpoint)"
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
             case .Status(let status):
