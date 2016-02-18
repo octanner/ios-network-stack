@@ -10,11 +10,11 @@ import Foundation
 import JaSON
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func post(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func patch(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func put(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
-    func delete(endpoint: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
+    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
+    func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
+    func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
+    func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
+    func delete(endpoint: String, completion: Network.ResponseCompletion) throws
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -43,27 +43,27 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.get(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func post(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.post(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func patch(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.patch(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func put(endpoint: String, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.put(url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func delete(endpoint: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
+    public func delete(endpoint: String, completion: Network.ResponseCompletion) throws {
         let (session, url) = try config(endpoint)
         network.delete(url, session: session, completion: completion)
     }
@@ -75,10 +75,11 @@ public struct NetworkAPIRequests: NetworkRequests {
 
 private extension NetworkAPIRequests {
     
+    /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
-        guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.MissingAppNetworkState }
-        guard let session = defaultSession else { throw Network.Error.AuthenticationRequired }
-        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.InvalidEndpoint }
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
+        guard let session = defaultSession else { throw Network.Error.Status(status: 401) } // TODO fixme magic number yuck plus kinda wrong
+        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
     

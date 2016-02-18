@@ -19,7 +19,7 @@ struct OAuth2Token: JSONObjectConvertible {
     }
 
 
-    // MARK: - Public properties
+    // MARK: - Internal properties
     
     let accessToken: String
     let expiresAt: NSDate
@@ -41,9 +41,9 @@ struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Initializers
     
-    init(accessToken: String, expiresAt: NSDate? = nil, refreshToken: String? = nil) {
+    init(accessToken: String, expiresAt: NSDate = NSDate.distantFuture(), refreshToken: String? = nil) {
         self.accessToken = accessToken
-        self.expiresAt = expiresAt ?? NSDate.distantFuture()
+        self.expiresAt = expiresAt
         self.refreshToken = refreshToken
     }
     

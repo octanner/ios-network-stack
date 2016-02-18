@@ -10,7 +10,7 @@ import Foundation
 import JaSON
 
 public protocol AuthRequests {
-    func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws
+    func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws
     func logOut()
 }
 
@@ -28,9 +28,10 @@ public struct AuthAPIRequests: AuthRequests {
     
     // MARK: - Public API
     
-    public func logIn(username: String, password: String, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) throws {
-        guard let appNetworkState = AppNetworkState.currentAppState else { throw Network.Error.MissingAppNetworkState }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.InvalidEndpoint }
+    /// - Precondition: `AppNetworkState.currentAppState` must not be nil
+    public func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws {
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
         let parameters = [
             "grant_type": "password",
             "username": username,

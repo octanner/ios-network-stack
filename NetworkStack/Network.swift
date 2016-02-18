@@ -11,39 +11,42 @@ import JaSON
 
 public struct Network {
     
+    static private let knownErrorStatusCodes = [
+        400: "Bad Request",
+        401: "Authentication Required",
+        403: "Forbidden",
+        404: "Not Found",
+        500: "Internal Server Error",
+    ]
+    
+    public typealias ResponseCompletion = (responseObject: JSONObject?, error: ErrorType?) -> Void
+    
     // MARK: - Error
     
     public enum Error: ErrorType, CustomStringConvertible {
-        case AuthenticationRequired
-        case InvalidEndpoint
-        case MissingAppNetworkState
+        
+        /// Attempted to request a malformed API endpoint
+        case MalformedEndpoint(endpoint: String)
+        
+        /// Recieved an invalid response from the server.
         case ResponseNotValidHTTP
-        case Status500
-        case Status404
-        case Status403
-        case Status400
-        case UnknownNetworkError(status: Int)
+        
+        /// HTTP Error status code
+        case Status(status: Int)
         
         public var description: String {
             switch self {
-            case .AuthenticationRequired:
-                return "Hold up! Log in to continue."
-            case .InvalidEndpoint:
-                return "Oops. Your request made no sense."
-            case .MissingAppNetworkState:
-                return "What the!? How did you even get here?"
+            case .MalformedEndpoint(let endpoint):
+                return "Attempted to request a malformed API endpoint: \(endpoint)"
             case .ResponseNotValidHTTP:
-                return "Yikes. The server’s talking back to you."
-            case .Status500:
-                return "Ugh. Internal server error. (Code 500)"
-            case .Status404:
-                return "Uh oh. There’s nothing here. (Code 404)"
-            case .Status403:
-                return "Ah ah ah. You don’t have access. (Code 403)"
-            case .Status400:
-                return "Oops. Your request made no sense. (Code 400)"
-            case .UnknownNetworkError(let status):
-                return "Hmm. Something’s wrong. (Code \(status))"
+                return "Response was not an HTTP Response."
+            case .Status(let status):
+                if let errorMessage = knownErrorStatusCodes[status] {
+                    return "\(status) \(errorMessage)"
+                }
+                else {
+                    return "Unknown Network Error. Status: \(status))"
+                }
             }
         }
     }
@@ -62,7 +65,7 @@ public struct Network {
     
     // MARK: - Public API
     
-    public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         let _url: NSURL
         let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems(parameters)
@@ -74,19 +77,19 @@ public struct Network {
         performNetworkCall(.GET, url: _url, session: session, parameters: nil, completion: completion)
     }
     
-    public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         performNetworkCall(.POST, url: url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         performNetworkCall(.PATCH, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         performNetworkCall(.PUT, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func delete(url: NSURL, session: NSURLSession, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    public func delete(url: NSURL, session: NSURLSession, completion: Network.ResponseCompletion) {
         performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
     }
 
@@ -97,7 +100,7 @@ public struct Network {
 
 private extension Network {
     
-    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = requestType.rawValue
         request.HTTPBody = parameterData(parameters)
@@ -109,30 +112,16 @@ private extension Network {
             }
             if case let status = response.statusCode where status >= 200 && status < 300 {
                 let responseObject = self.parseResponse(data)
-                self.finalizeNetworkCall(responseObject: responseObject, error: error, completion: completion)
+                self.finalizeNetworkCall(responseObject: responseObject, error: nil, completion: completion)
             } else {
-                var customNetworkError: Error?
-                let status = response.statusCode
-                if status == 500 {
-                    customNetworkError = .Status500
-                } else if status == 404 {
-                    customNetworkError = .Status404
-                } else if status == 403 {
-                    customNetworkError = .Status403
-                } else if status == 401 {
-                    customNetworkError = .AuthenticationRequired
-                } else if status == 400 {
-                    customNetworkError = .Status400
-                } else if error == nil {
-                    customNetworkError = .UnknownNetworkError(status: status)
-                }
-                self.finalizeNetworkCall(responseObject: nil, error: customNetworkError ?? error, completion: completion)
+                let networkError = Error.Status(status: response.statusCode)
+                self.finalizeNetworkCall(responseObject: nil, error: networkError, completion: completion)
             }
         }
         task.resume()
     }
     
-    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: (responseObject: JSONObject?, error: ErrorType?) -> Void) {
+    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: Network.ResponseCompletion) {
         dispatch_async(dispatch_get_main_queue()) {
             completion(responseObject: responseObject, error: error)
         }
