@@ -19,7 +19,7 @@ struct OAuth2Token: JSONObjectConvertible {
     }
 
 
-    // MARK: - Public properties
+    // MARK: - Internal properties
     
     let accessToken: String
     let expiresAt: NSDate
