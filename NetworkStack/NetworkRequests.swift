@@ -77,7 +77,7 @@ private extension NetworkAPIRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
-        guard let appNetworkState = AppNetworkState.currentAppState else { preconditionFailure("Must configure current app state to config") }
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
         guard let session = defaultSession else { throw Network.Error.Status(status: 401) } // TODO fixme magic number yuck plus kinda wrong
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)

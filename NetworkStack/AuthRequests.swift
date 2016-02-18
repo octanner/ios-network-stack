@@ -30,7 +30,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     public func logIn(username: String, password: String, completion: NetworkResponseCompletion) throws {
-        guard let appNetworkState = AppNetworkState.currentAppState else { preconditionFailure("Must configure current app state to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
         let parameters = [
             "grant_type": "password",
