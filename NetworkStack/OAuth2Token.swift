@@ -21,9 +21,9 @@ struct OAuth2Token: JSONObjectConvertible {
 
     // MARK: - Public properties
     
-    var accessToken: String
-    var expiresAt: NSDate
-    var refreshToken: String?
+    let accessToken: String
+    let expiresAt: NSDate
+    let refreshToken: String?
     
     
     // MARK: - Private properties
