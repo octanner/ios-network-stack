@@ -33,10 +33,10 @@ struct OAuth2Token: JSONObjectConvertible {
     
     // MARK: - Constants
     
-    private let accessTokenKey = "access_token"
-    private let expiresAtKey = "expires_at"
-    private let expiresInKey = "expires_in"
-    private let refreshTokenKey = "refresh_token"
+    private static let accessTokenKey = "access_token"
+    private static let expiresAtKey = "expires_at"
+    private static let expiresInKey = "expires_in"
+    private static let refreshTokenKey = "refresh_token"
     
     
     // MARK: - Initializers
@@ -48,18 +48,18 @@ struct OAuth2Token: JSONObjectConvertible {
     }
     
     init(json: JSONObject) throws {
-        self.accessToken = try json <| accessTokenKey
-        let expiresIn: NSTimeInterval = try json <| expiresInKey
+        self.accessToken = try json <| OAuth2Token.accessTokenKey
+        let expiresIn: NSTimeInterval = try json <| OAuth2Token.expiresInKey
         self.expiresAt = NSDate(timeIntervalSinceNow: expiresIn)
-        self.refreshToken = try json <| refreshTokenKey
+        self.refreshToken = try json <| OAuth2Token.refreshTokenKey
     }
 
     init(key: String) throws {
         let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
 
-        guard let accessToken = dictionary[accessTokenKey] as? String else { throw Error.TypeMismatch }
-        guard let expiresAt = dictionary[expiresAtKey] as? NSDate else { throw Error.TypeMismatch }
-        guard let refresh = dictionary[refreshTokenKey] as? String else { throw Error.TypeMismatch }
+        guard let accessToken = dictionary[OAuth2Token.accessTokenKey] as? String else { throw Error.TypeMismatch }
+        guard let expiresAt = dictionary[OAuth2Token.expiresAtKey] as? NSDate else { throw Error.TypeMismatch }
+        guard let refresh = dictionary[OAuth2Token.refreshTokenKey] as? String else { throw Error.TypeMismatch }
 
         self.accessToken = accessToken
         self.expiresAt = expiresAt
@@ -71,9 +71,9 @@ struct OAuth2Token: JSONObjectConvertible {
 
     func lock(key: String) throws {
         let tokenValues: [String: AnyObject] = [
-            accessTokenKey: accessToken,
-            expiresAtKey: expiresAt,
-            refreshTokenKey: refreshToken ?? ""
+            OAuth2Token.accessTokenKey: accessToken,
+            OAuth2Token.expiresAtKey: expiresAt,
+            OAuth2Token.refreshTokenKey: refreshToken ?? ""
         ]
         try OAuth2Token.keychain.set(tokenValues, forKey: OAuth2Token.tokenKey(key))
     }
