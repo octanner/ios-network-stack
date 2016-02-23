@@ -19,7 +19,7 @@ public struct Network {
         500: "Internal Server Error",
     ]
     
-    public typealias ResponseCompletion = (responseObject: JSONObject?, error: ErrorType?) -> Void
+    public typealias ResponseCompletion = Result<JSONObject> -> Void
     
     // MARK: - Error
     
@@ -34,6 +34,9 @@ public struct Network {
         /// HTTP Error status code
         case Status(status: Int)
         
+        /// Response came back with no data
+        case NoData
+        
         public var description: String {
             switch self {
             case .MalformedEndpoint(let endpoint):
@@ -47,6 +50,8 @@ public struct Network {
                 else {
                     return "Unknown Network Error. Status: \(status))"
                 }
+            case .NoData:
+                return "Response returned with no data"
             }
         }
     }
@@ -107,23 +112,34 @@ private extension Network {
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             guard let response = response as? NSHTTPURLResponse else {
-                self.finalizeNetworkCall(responseObject: nil, error: Error.ResponseNotValidHTTP, completion: completion)
+                self.finalizeNetworkCall(result: .Error(Error.ResponseNotValidHTTP), completion: completion)
                 return
             }
             if case let status = response.statusCode where status >= 200 && status < 300 {
-                let responseObject = self.parseResponse(data)
-                self.finalizeNetworkCall(responseObject: responseObject, error: nil, completion: completion)
+                guard let data = data else {
+                    self.finalizeNetworkCall(result: .Error(Error.NoData), completion: completion)
+                    return
+                }
+                do {
+                    let responseObject = try JSONParser.JSONObjectWithData(data)
+                    self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                }
+                catch {
+                    self.finalizeNetworkCall(result: .Error(error), completion: completion)
+                }
+                
+                
             } else {
                 let networkError = Error.Status(status: response.statusCode)
-                self.finalizeNetworkCall(responseObject: nil, error: networkError, completion: completion)
+                self.finalizeNetworkCall(result: .Error(networkError), completion: completion)
             }
         }
         task.resume()
     }
     
-    func finalizeNetworkCall(responseObject responseObject: JSONObject?, error: ErrorType?, completion: Network.ResponseCompletion) {
+    func finalizeNetworkCall(result result: Result<JSONObject>, completion: Network.ResponseCompletion) {
         dispatch_async(dispatch_get_main_queue()) {
-            completion(responseObject: responseObject, error: error)
+            completion(result)
         }
     }
     
@@ -149,14 +165,4 @@ private extension Network {
         }
         return nil
     }
-    
-    func parseResponse(data: NSData?) -> JSONObject? {
-        if let data = data {
-            if let json = try? NSJSONSerialization.JSONObjectWithData(data, options: [NSJSONReadingOptions.AllowFragments]) {
-                return json as? JSONObject
-            }
-        }
-        return nil
-    }
-    
 }

@@ -42,16 +42,17 @@ public struct AuthAPIRequests: AuthRequests {
         configuration.timeoutIntervalForRequest = 10.0
         let session = NSURLSession(configuration: configuration)
         
-        network.post(url, session: session, parameters: parameters) { responseObject, networkError in
-            if let responseObject = responseObject {
+        network.post(url, session: session, parameters: parameters) { result in
+            switch result {
+            case let .Ok(json):
                 do {
-                    try appNetworkState.saveToken(responseObject)
-                    completion(responseObject: responseObject, error: nil)
+                    try appNetworkState.saveToken(json)
+                    completion(result)
                 } catch {
-                    completion(responseObject: nil, error: error)
+                    completion(.Error(error))
                 }
-            } else {
-                completion(responseObject: nil, error: networkError)
+            case .Error:
+                completion(result)
             }
         }
     }
