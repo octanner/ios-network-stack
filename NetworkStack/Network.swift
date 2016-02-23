@@ -11,7 +11,7 @@ import JaSON
 
 public struct Network {
     
-    static private let knownErrorStatusCodes = [
+    private static let knownErrorStatusCodes = [
         400: "Bad Request",
         401: "Authentication Required",
         403: "Forbidden",
