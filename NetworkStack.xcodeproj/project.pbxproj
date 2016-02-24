@@ -17,6 +17,7 @@
 		701762A91C6D2F64008D42C6 /* AuthRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701762A81C6D2F64008D42C6 /* AuthRequests.swift */; };
 		AFBED1E61C7CDA3B00622331 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBED1E51C7CDA3B00622331 /* Result.swift */; };
 		AFBED2781C7E651900622331 /* Marshal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFBED2771C7E651900622331 /* Marshal.framework */; };
+		AFBED27A1C7E68E600622331 /* NSDate+ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */; };
 		B06646A41C7E4707000CCBC5 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */; };
 		B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */; };
 /* End PBXBuildFile section */
@@ -45,6 +46,7 @@
 		701762A81C6D2F64008D42C6 /* AuthRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthRequests.swift; sourceTree = "<group>"; };
 		AFBED1E51C7CDA3B00622331 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		AFBED2771C7E651900622331 /* Marshal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Marshal.framework; path = "Carthage/Checkouts/Marshal/build/Debug-iphoneos/Marshal.framework"; sourceTree = "<group>"; };
+		AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+ValueType.swift"; sourceTree = "<group>"; };
 		B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuth2Client.swift; sourceTree = "<group>"; };
 		B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNetworkState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -101,6 +103,7 @@
 				701762881C6D117D008D42C6 /* Info.plist */,
 				701762A11C6D1237008D42C6 /* Frameworks */,
 				AFBED1E51C7CDA3B00622331 /* Result.swift */,
+				AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */,
 			);
 			path = NetworkStack;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 			files = (
 				AFBED1E61C7CDA3B00622331 /* Result.swift in Sources */,
 				701762A51C6D2F54008D42C6 /* Network.swift in Sources */,
+				AFBED27A1C7E68E600622331 /* NSDate+ValueType.swift in Sources */,
 				701762A31C6D2F4B008D42C6 /* OAuth2Token.swift in Sources */,
 				B06646A41C7E4707000CCBC5 /* OAuth2Client.swift in Sources */,
 				B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */,
