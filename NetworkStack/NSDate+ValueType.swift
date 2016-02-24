@@ -12,13 +12,20 @@ import Marshal
 extension NSDate: ValueType {
     
     public static func value(object: Any) throws -> NSDate {
-        guard let dateString = object as? String else {
+        // handle date strings
+        if let dateString = object as? String {
+            guard let date = NSDate.fromISO8601String(dateString) else {
+                throw Marshal.Error.TypeMismatch(expected: "ISO8601 date string", actual: dateString)
+            }
+            return date
+        }
+        // handle NSDate objects
+        else if let date = object as? NSDate {
+            return date
+        }
+        else {
             throw Marshal.Error.TypeMismatch(expected: String.self, actual: object.dynamicType)
         }
-        guard let date = NSDate.fromISO8601String(dateString) else {
-            throw Marshal.Error.TypeMismatch(expected: "ISO8601 date string", actual: dateString)
-        }
-        return date
     }
 }
 
