@@ -49,13 +49,8 @@ struct OAuth2Client: Marshal.ObjectConvertible {
     }
     
     init(key: String) throws {
-        let dictionary: [String: AnyObject] = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
-        
-        guard let id = dictionary[OAuth2Client.idKey] as? String else { throw Error.TypeMismatch }
-        guard let secret = dictionary[OAuth2Client.secretKey] as? String else { throw Error.TypeMismatch }
-        
-        self.id = id
-        self.secret = secret
+        let dictionary: Object = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
+        try self.init(object: dictionary)
     }
     
     

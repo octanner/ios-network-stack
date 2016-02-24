@@ -55,15 +55,8 @@ struct OAuth2Token: Marshal.ObjectConvertible {
     }
 
     init(key: String) throws {
-        let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
-
-        guard let accessToken = dictionary[OAuth2Token.accessTokenKey] as? String else { throw Error.TypeMismatch }
-        guard let expiresAt = dictionary[OAuth2Token.expiresAtKey] as? NSDate else { throw Error.TypeMismatch }
-        guard let refresh = dictionary[OAuth2Token.refreshTokenKey] as? String else { throw Error.TypeMismatch }
-
-        self.accessToken = accessToken
-        self.expiresAt = expiresAt
-        self.refreshToken = refresh == "" ? nil : refresh
+        let dictionary: Object = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
+        try self.init(object: dictionary)
     }
     
     
