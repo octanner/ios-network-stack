@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 
 public struct Network {
     

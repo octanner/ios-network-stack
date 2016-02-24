@@ -4,3 +4,6 @@
 [submodule "Carthage/Checkouts/SimpleKeychain"]
 	path = Carthage/Checkouts/SimpleKeychain
 	url = https://github.com/octanner/SimpleKeychain.git
+[submodule "Carthage/Checkouts/Marshal"]
+	path = Carthage/Checkouts/Marshal
+	url = https://github.com/utahiosmac/Marshal.git

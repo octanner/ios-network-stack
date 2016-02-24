@@ -5,9 +5,9 @@
       location = "group:NetworkStack.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Carthage/Checkouts/JaSON/JaSON.xcodeproj">
+      location = "group:Carthage/Checkouts/SimpleKeychain/SimpleKeychain.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Carthage/Checkouts/SimpleKeychain/SimpleKeychain.xcodeproj">
+      location = "group:Carthage/Checkouts/Marshal/Marshal.xcodeproj">
    </FileRef>
 </Workspace>

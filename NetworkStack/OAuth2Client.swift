@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 import SimpleKeychain
 
-struct OAuth2Client: JSONObjectConvertible {
+struct OAuth2Client: Marshal.ObjectConvertible {
     
     // MARK: - Error
     
@@ -43,9 +43,9 @@ struct OAuth2Client: JSONObjectConvertible {
         self.secret = secret
     }
     
-    init(json: JSONObject) throws {
-        self.id = try json <| OAuth2Client.idKey
-        self.secret = try json <| OAuth2Client.secretKey
+    init(object: JSONObject) throws {
+        self.id = try object <| OAuth2Client.idKey
+        self.secret = try object <| OAuth2Client.secretKey
     }
     
     init(key: String) throws {

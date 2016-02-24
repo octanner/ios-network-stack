@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 
 
 public struct AppNetworkState {
@@ -114,12 +114,12 @@ extension AppNetworkState {
     }
 
     func saveToken(json: JSONObject) throws {
-        let token = try OAuth2Token(json: json)
+        let token = try OAuth2Token(object: json)
         try token.lock(environmentKey)
     }
 
     func saveClient(json: JSONObject) throws {
-        let client = try OAuth2Client(json: json)
+        let client = try OAuth2Client(object: json)
         try client.lock(environmentKey)
     }
     

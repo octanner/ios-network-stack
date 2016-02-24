@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 import SimpleKeychain
 
-struct OAuth2Token: JSONObjectConvertible {
+struct OAuth2Token: Marshal.ObjectConvertible {
 
     // MARK: - Error
 
@@ -47,11 +47,11 @@ struct OAuth2Token: JSONObjectConvertible {
         self.refreshToken = refreshToken
     }
     
-    init(json: JSONObject) throws {
-        self.accessToken = try json <| OAuth2Token.accessTokenKey
-        let expiresIn: NSTimeInterval = try json <| OAuth2Token.expiresInKey
+    init(object: JSONObject) throws {
+        self.accessToken = try object <| OAuth2Token.accessTokenKey
+        let expiresIn: NSTimeInterval = try object <| OAuth2Token.expiresInKey
         self.expiresAt = NSDate(timeIntervalSinceNow: expiresIn)
-        self.refreshToken = try json <| OAuth2Token.refreshTokenKey
+        self.refreshToken = try object <| OAuth2Token.refreshTokenKey
     }
 
     init(key: String) throws {
