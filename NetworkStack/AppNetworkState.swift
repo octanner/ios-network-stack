@@ -118,8 +118,17 @@ extension AppNetworkState {
         try token.lock(environmentKey)
     }
 
+    func saveClient(json: JSONObject) throws {
+        let client = try OAuth2Client(json: json)
+        try client.lock(environmentKey)
+    }
+    
     func deleteToken() {
         OAuth2Token.delete(environmentKey)
+    }
+    
+    func deleteClient() {
+        OAuth2Client.delete(environmentKey)
     }
 
 }
