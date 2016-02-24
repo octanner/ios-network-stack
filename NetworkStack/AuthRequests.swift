@@ -11,6 +11,7 @@ import JaSON
 
 public protocol AuthRequests {
     func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws
+    func authDevice(pairingCode: String, completion: Network.ResponseCompletion) throws
     func logOut()
 }
 
@@ -47,6 +48,38 @@ public struct AuthAPIRequests: AuthRequests {
             case let .Ok(json):
                 do {
                     try appNetworkState.saveToken(json)
+                    completion(result)
+                } catch {
+                    completion(.Error(error))
+                }
+            case .Error:
+                completion(result)
+            }
+        }
+    }
+    
+    /// - Precondition: `AppNetworkState.currentAppState` must not be nil
+    public func authDevice(pairingCode: String, completion: Network.ResponseCompletion) throws {
+        guard let deviceUUID = UIDevice.currentDevice().identifierForVendor else { fatalError("Device must have an identifier to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
+        let parameters = [
+            "client_id": pairingCode,
+            "grant_type": "device",
+            "device_id" : deviceUUID.UUIDString,
+            "device_name" : UIDevice.currentDevice().name
+        ]
+        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
+        configuration.timeoutIntervalForRequest = 10.0
+        let session = NSURLSession(configuration: configuration)
+        
+        network.post(url, session: session, parameters: parameters) { result in
+            switch result {
+            case let .Ok(json):
+                do {
+                    try appNetworkState.saveToken(json)
+                    try appNetworkState.saveClient(json)
                     completion(result)
                 } catch {
                     completion(.Error(error))
