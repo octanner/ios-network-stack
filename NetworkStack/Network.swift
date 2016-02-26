@@ -11,6 +11,8 @@ import JaSON
 
 public struct Network {
     
+    // MARK: - Definitions
+    
     private static let knownErrorStatusCodes = [
         400: "Bad Request",
         401: "Authentication Required",
@@ -20,6 +22,7 @@ public struct Network {
     ]
     
     public typealias ResponseCompletion = Result<JSONObject> -> Void
+    
     
     // MARK: - Error
     
@@ -66,6 +69,11 @@ public struct Network {
         case PUT
         case DELETE
     }
+    
+    
+    // MARK: - Initializers
+    
+    public init() { }
     
     
     // MARK: - Public API
@@ -121,8 +129,12 @@ private extension Network {
                     return
                 }
                 do {
-                    let responseObject = try JSONParser.JSONObjectWithData(data)
-                    self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                    if data.length > 0 {
+                        let responseObject = try JSONParser.JSONObjectWithData(data)
+                        self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                    } else {
+                        self.finalizeNetworkCall(result: .Ok(JSONObject()), completion: completion)
+                    }
                 }
                 catch {
                     self.finalizeNetworkCall(result: .Error(error), completion: completion)
