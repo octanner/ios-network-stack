@@ -49,7 +49,7 @@ struct OAuth2Client: Unmarshaling {
     }
     
     init(key: String) throws {
-        let dictionary: Object = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
+        let dictionary: MarshaledObject = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
         try self.init(object: dictionary)
     }
     
