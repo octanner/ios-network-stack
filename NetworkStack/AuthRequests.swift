@@ -10,9 +10,9 @@ import Foundation
 import JaSON
 
 public protocol AuthRequests {
-    func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws
-    func authDevice(pairingCode: String, completion: Network.ResponseCompletion) throws
-    func registerUser(tokenJSON: JSONObject) throws
+    func authenticate(username: String, password: String, completion: Network.ResponseCompletion) throws
+    func authenticate(pairingCode: String, completion: Network.ResponseCompletion) throws
+    func authenticate(tokenJSON: JSONObject) throws
     func logOut()
 }
 
@@ -31,7 +31,7 @@ public struct AuthAPIRequests: AuthRequests {
     // MARK: - Public API
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws {
+    public func authenticate(username: String, password: String, completion: Network.ResponseCompletion) throws {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
         let parameters = [
@@ -60,7 +60,7 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authDevice(pairingCode: String, completion: Network.ResponseCompletion) throws {
+    public func authenticate(pairingCode: String, completion: Network.ResponseCompletion) throws {
         guard let deviceUUID = UIDevice.currentDevice().identifierForVendor else { fatalError("Device must have an identifier to log in") }
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
@@ -92,7 +92,7 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func registerUser(tokenJSON: JSONObject) throws {
+    public func authenticate(tokenJSON: JSONObject) throws {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         try appNetworkState.saveToken(tokenJSON)
     }
