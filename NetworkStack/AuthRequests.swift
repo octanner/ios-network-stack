@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 
 public protocol AuthRequests {
     func authenticate(username: String, password: String, completion: Network.ResponseCompletion) throws

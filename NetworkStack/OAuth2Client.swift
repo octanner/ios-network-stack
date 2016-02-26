@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 import SimpleKeychain
 
-struct OAuth2Client: JSONObjectConvertible {
+struct OAuth2Client: Unmarshaling {
     
     // MARK: - Error
     
@@ -43,19 +43,14 @@ struct OAuth2Client: JSONObjectConvertible {
         self.secret = secret
     }
     
-    init(json: JSONObject) throws {
-        self.id = try json <| OAuth2Client.idKey
-        self.secret = try json <| OAuth2Client.secretKey
+    init(object: JSONObject) throws {
+        self.id = try object <| OAuth2Client.idKey
+        self.secret = try object <| OAuth2Client.secretKey
     }
     
     init(key: String) throws {
-        let dictionary: [String: AnyObject] = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
-        
-        guard let id = dictionary[OAuth2Client.idKey] as? String else { throw Error.TypeMismatch }
-        guard let secret = dictionary[OAuth2Client.secretKey] as? String else { throw Error.TypeMismatch }
-        
-        self.id = id
-        self.secret = secret
+        let dictionary: MarshaledObject = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
+        try self.init(object: dictionary)
     }
     
     

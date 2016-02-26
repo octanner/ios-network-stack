@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 import SimpleKeychain
 
-struct OAuth2Token: JSONObjectConvertible {
+struct OAuth2Token: Unmarshaling {
 
     // MARK: - Error
 
@@ -47,23 +47,16 @@ struct OAuth2Token: JSONObjectConvertible {
         self.refreshToken = refreshToken
     }
     
-    init(json: JSONObject) throws {
-        self.accessToken = try json <| OAuth2Token.accessTokenKey
-        let expiresIn: NSTimeInterval = try json <| OAuth2Token.expiresInKey
+    init(object: JSONObject) throws {
+        self.accessToken = try object <| OAuth2Token.accessTokenKey
+        let expiresIn: NSTimeInterval = try object <| OAuth2Token.expiresInKey
         self.expiresAt = NSDate(timeIntervalSinceNow: expiresIn)
-        self.refreshToken = try json <| OAuth2Token.refreshTokenKey
+        self.refreshToken = try object <| OAuth2Token.refreshTokenKey
     }
 
     init(key: String) throws {
-        let dictionary: [String: AnyObject] = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
-
-        guard let accessToken = dictionary[OAuth2Token.accessTokenKey] as? String else { throw Error.TypeMismatch }
-        guard let expiresAt = dictionary[OAuth2Token.expiresAtKey] as? NSDate else { throw Error.TypeMismatch }
-        guard let refresh = dictionary[OAuth2Token.refreshTokenKey] as? String else { throw Error.TypeMismatch }
-
-        self.accessToken = accessToken
-        self.expiresAt = expiresAt
-        self.refreshToken = refresh == "" ? nil : refresh
+        let dictionary: MarshaledObject = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
+        try self.init(object: dictionary)
     }
     
     

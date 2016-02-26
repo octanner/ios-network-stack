@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import JaSON
+import Marshal
 
 public protocol NetworkRequests {
     func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
