@@ -133,7 +133,7 @@ private extension Network {
                         let responseObject = try JSONParser.JSONObjectWithData(data)
                         self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
                     } else {
-                        self.finalizeNetworkCall(result: .Ok([:]), completion: completion)
+                        self.finalizeNetworkCall(result: .Ok(JSONObject()), completion: completion)
                     }
                 }
                 catch {
