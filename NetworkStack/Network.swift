@@ -11,6 +11,8 @@ import JaSON
 
 public struct Network {
     
+    // MARK: - Definitions
+    
     private static let knownErrorStatusCodes = [
         400: "Bad Request",
         401: "Authentication Required",
@@ -20,6 +22,7 @@ public struct Network {
     ]
     
     public typealias ResponseCompletion = Result<JSONObject> -> Void
+    
     
     // MARK: - Error
     
@@ -66,6 +69,11 @@ public struct Network {
         case PUT
         case DELETE
     }
+    
+    
+    // MARK: - Initializers
+    
+    public init() { }
     
     
     // MARK: - Public API
