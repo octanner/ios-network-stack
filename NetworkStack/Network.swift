@@ -129,8 +129,12 @@ private extension Network {
                     return
                 }
                 do {
-                    let responseObject = try JSONParser.JSONObjectWithData(data)
-                    self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                    if data.length > 0 {
+                        let responseObject = try JSONParser.JSONObjectWithData(data)
+                        self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                    } else {
+                        self.finalizeNetworkCall(result: .Ok([:]), completion: completion)
+                    }
                 }
                 catch {
                     self.finalizeNetworkCall(result: .Error(error), completion: completion)
