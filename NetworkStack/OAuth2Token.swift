@@ -56,7 +56,10 @@ struct OAuth2Token: Unmarshaling {
 
     init(key: String) throws {
         let dictionary: MarshaledObject = try OAuth2Token.keychain.valueForKey(OAuth2Token.tokenKey(key))
-        try self.init(object: dictionary)
+        
+        self.accessToken = try dictionary <| OAuth2Token.accessTokenKey
+        self.expiresAt = try dictionary <| OAuth2Token.expiresAtKey
+        self.refreshToken = try dictionary <| OAuth2Token.refreshTokenKey
     }
     
     
