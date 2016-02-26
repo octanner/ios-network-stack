@@ -10,7 +10,7 @@ import Foundation
 import Marshal
 import SimpleKeychain
 
-struct OAuth2Token: Marshal.ObjectConvertible {
+struct OAuth2Token: Unmarshaling {
 
     // MARK: - Error
 
