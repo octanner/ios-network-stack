@@ -12,6 +12,7 @@ import JaSON
 public protocol AuthRequests {
     func logIn(username: String, password: String, completion: Network.ResponseCompletion) throws
     func authDevice(pairingCode: String, completion: Network.ResponseCompletion) throws
+    func registerUser(tokenJSON: JSONObject) throws
     func logOut()
 }
 
@@ -88,6 +89,12 @@ public struct AuthAPIRequests: AuthRequests {
                 completion(result)
             }
         }
+    }
+    
+    /// - Precondition: `AppNetworkState.currentAppState` must not be nil
+    public func registerUser(tokenJSON: JSONObject) throws {
+        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        try appNetworkState.saveToken(tokenJSON)
     }
     
     public func logOut() {
