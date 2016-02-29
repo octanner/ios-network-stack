@@ -10,7 +10,7 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
+    func get(endpoint: String, parameters: JSONObject?, preventCaching: Bool, completion: Network.ResponseCompletion)
     func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
@@ -31,19 +31,19 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Private properties
     
-    private var defaultSession: NSURLSession? {
+    private var defaultConfiguration: NSURLSessionConfiguration? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = appNetworkState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
-        return NSURLSession(configuration: configuration)
+        return configuration
     }
     
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func get(endpoint: String, parameters: JSONObject?, preventCaching: Bool = false, completion: Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint)
             network.get(url, session: session, parameters: parameters, completion: completion)
@@ -102,9 +102,13 @@ public struct NetworkAPIRequests: NetworkRequests {
 private extension NetworkAPIRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
+    func config(endpoint: String, preventCaching: Bool = false) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let session = defaultSession else { throw Network.Error.Status(status: 401) }
+        guard let configuration = defaultConfiguration else { throw Network.Error.Status(status: 401) }
+        if preventCaching {
+            configuration.URLCache = nil
+        }
+        let session = NSURLSession(configuration: configuration)
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
