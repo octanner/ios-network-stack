@@ -10,8 +10,8 @@ import Foundation
 import Marshal
 
 public protocol AuthRequests {
-    func authenticate(username: String, password: String, completion: Network.ResponseCompletion) throws
-    func authenticate(pairingCode: String, completion: Network.ResponseCompletion) throws
+    func authenticate(username: String, password: String, completion: Network.ResponseCompletion)
+    func authenticate(pairingCode: String, completion: Network.ResponseCompletion)
     func authenticate(tokenJSON: JSONObject) throws
     func logOut()
 }
@@ -31,9 +31,13 @@ public struct AuthAPIRequests: AuthRequests {
     // MARK: - Public API
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(username: String, password: String, completion: Network.ResponseCompletion) throws {
+    public func authenticate(username: String, password: String, completion: Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
+        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
+            let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
+            completion(.Error(error))
+            return
+        }
         let parameters = [
             "grant_type": "password",
             "username": username,
@@ -60,10 +64,14 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(pairingCode: String, completion: Network.ResponseCompletion) throws {
+    public func authenticate(pairingCode: String, completion: Network.ResponseCompletion) {
         guard let deviceUUID = UIDevice.currentDevice().identifierForVendor else { fatalError("Device must have an identifier to log in") }
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else { throw Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString) }
+        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
+            let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
+            completion(.Error(error))
+            return
+        }
         let parameters = [
             "client_id": pairingCode,
             "grant_type": "device",
