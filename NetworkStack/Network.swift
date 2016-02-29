@@ -116,7 +116,12 @@ private extension Network {
     func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = requestType.rawValue
-        request.HTTPBody = parameterData(parameters)
+        do {
+            request.HTTPBody = try parameters?.jsonData()
+        } catch {
+            completion(.Error(error))
+            return
+        }
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             guard let response = response as? NSHTTPURLResponse else {
@@ -167,14 +172,4 @@ private extension Network {
         return nil
     }
     
-    func parameterData(parameters: JSONObject?) -> NSData? {
-        if let parameters = parameters {
-            var adjustedParameters = [String: String]()
-            for (name, value) in parameters {
-                adjustedParameters[name] = String(value)
-            }
-            return try? NSJSONSerialization.dataWithJSONObject(adjustedParameters, options: [])
-        }
-        return nil
-    }
 }
