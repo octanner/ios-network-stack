@@ -29,7 +29,7 @@ public enum Result<T> {
     public func flatMap<U>(@noescape f: T -> Result<U>) -> Result<U> {
         switch self {
         case let .Ok(x):
-            return try f(x)
+            return f(x)
         case let .Error(error):
             return .Error(error)
         }
