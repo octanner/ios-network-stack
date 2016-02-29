@@ -10,11 +10,11 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
-    func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
-    func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
-    func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws
-    func delete(endpoint: String, completion: Network.ResponseCompletion) throws
+    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
+    func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
+    func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
+    func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
+    func delete(endpoint: String, completion: Network.ResponseCompletion)
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -43,29 +43,55 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
-        let (session, url) = try config(endpoint)
-        network.get(url, session: session, parameters: parameters, completion: completion)
+    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint)
+            network.get(url, session: session, parameters: parameters, completion: completion)
+        }
+        catch {
+            completion(.Error(error))
+        }
     }
     
-    public func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
-        let (session, url) = try config(endpoint)
-        network.post(url, session: session, parameters: parameters, completion: completion)
+    public func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint)
+            network.post(url, session: session, parameters: parameters, completion: completion)
+        }
+        catch {
+            completion(.Error(error))
+        }
     }
     
-    public func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
-        let (session, url) = try config(endpoint)
-        network.patch(url, session: session, parameters: parameters, completion: completion)
+    public func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint)
+            network.patch(url, session: session, parameters: parameters, completion: completion)
+        }
+        catch {
+            completion(.Error(error))
+        }
     }
     
-    public func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) throws {
-        let (session, url) = try config(endpoint)
-        network.put(url, session: session, parameters: parameters, completion: completion)
+    public func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint)
+            network.put(url, session: session, parameters: parameters, completion: completion)
+        }
+        catch {
+            completion(.Error(error))
+        }
     }
     
-    public func delete(endpoint: String, completion: Network.ResponseCompletion) throws {
-        let (session, url) = try config(endpoint)
-        network.delete(url, session: session, completion: completion)
+    public func delete(endpoint: String, completion: Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint)
+            network.delete(url, session: session, completion: completion)
+        }
+            
+        catch {
+            completion(.Error(error))
+        }
     }
     
 }
