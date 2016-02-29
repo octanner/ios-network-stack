@@ -45,7 +45,7 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     public func get(endpoint: String, parameters: JSONObject?, preventCaching: Bool = false, completion: Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint, preventCaching: preventCaching)
             network.get(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
