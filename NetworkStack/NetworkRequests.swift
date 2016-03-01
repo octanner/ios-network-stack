@@ -31,13 +31,13 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Private properties
     
-    private var defaultConfiguration: NSURLSessionConfiguration? {
+    private var defaultSession: NSURLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = appNetworkState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
-        return configuration
+        return NSURLSession(configuration: configuration)
     }
     
     
@@ -104,8 +104,7 @@ private extension NetworkAPIRequests {
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let configuration = defaultConfiguration else { throw Network.Error.Status(status: 401) }
-        let session = NSURLSession(configuration: configuration)
+        guard let session = defaultSession else { throw Network.Error.Status(status: 401) }
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
