@@ -10,7 +10,8 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, preventCaching: Bool, completion: Network.ResponseCompletion)
+    var preventCaching: Bool { get set }
+    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
@@ -22,6 +23,11 @@ public struct NetworkAPIRequests: NetworkRequests {
     // MARK: - Public initializer
 
     public init() { }
+    
+    
+    // MARK: - Public properties
+    
+    public var preventCaching: Bool = false
 
     
     // MARK: - Internal properties
@@ -43,9 +49,9 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, preventCaching: Bool = false, completion: Network.ResponseCompletion) {
+    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint, preventCaching: preventCaching)
+            let (session, url) = try config(endpoint)
             network.get(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
@@ -102,7 +108,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 private extension NetworkAPIRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    func config(endpoint: String, preventCaching: Bool = false) throws -> (session: NSURLSession, url: NSURL) {
+    func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
         guard let configuration = defaultConfiguration else { throw Network.Error.Status(status: 401) }
         if preventCaching {
