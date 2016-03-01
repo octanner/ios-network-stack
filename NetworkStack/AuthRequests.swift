@@ -43,6 +43,9 @@ public struct AuthAPIRequests: AuthRequests {
             "username": username,
             "password": password
         ]
+        
+        NSURLCache.sharedURLCache().removeAllCachedResponses()
+
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
         configuration.timeoutIntervalForRequest = 10.0
@@ -78,6 +81,9 @@ public struct AuthAPIRequests: AuthRequests {
             "device_id" : deviceUUID.UUIDString,
             "device_name" : UIDevice.currentDevice().name
         ]
+        
+        NSURLCache.sharedURLCache().removeAllCachedResponses()
+        
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
         configuration.timeoutIntervalForRequest = 10.0
@@ -107,6 +113,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     public func logOut() {
         guard let appNetworkState = AppNetworkState.currentAppState else { return }
+        NSURLCache.sharedURLCache().removeAllCachedResponses()
         appNetworkState.deleteToken()
     }
 
