@@ -53,6 +53,17 @@ public struct AppNetworkState {
         guard let currentAppState = currentAppState else { return false }
         return currentAppState.accessToken != nil
     }
+    public var accessToken: String? {
+        do {
+            let token = try OAuth2Token(key: environmentKey)
+            if NSDate().compare(token.expiresAt) == .OrderedAscending {
+                return token.accessToken
+            }
+        } catch {
+            print(error)
+        }
+        return nil
+    }
     
     
     // MARK: - Private shared instance
@@ -84,21 +95,6 @@ public struct AppNetworkState {
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
-    }
-
-
-    // MARK: - Internal properties
-
-    var accessToken: String? {
-        do {
-            let token = try OAuth2Token(key: environmentKey)
-            if NSDate().compare(token.expiresAt) == .OrderedAscending {
-                return token.accessToken
-            }
-        } catch {
-            print(error)
-        }
-        return nil
     }
     
 }
