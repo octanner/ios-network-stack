@@ -43,6 +43,9 @@ public struct AuthAPIRequests: AuthRequests {
             "username": username,
             "password": password
         ]
+        
+        NSURLCache.sharedURLCache().removeAllCachedResponses()
+
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
         configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
         configuration.timeoutIntervalForRequest = 10.0
