@@ -10,7 +10,6 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    var preventCaching: Bool { get set }
     func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
     func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
@@ -23,11 +22,6 @@ public struct NetworkAPIRequests: NetworkRequests {
     // MARK: - Public initializer
 
     public init() { }
-    
-    
-    // MARK: - Public properties
-    
-    public var preventCaching: Bool = false
 
     
     // MARK: - Internal properties
@@ -111,9 +105,6 @@ private extension NetworkAPIRequests {
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
         guard let configuration = defaultConfiguration else { throw Network.Error.Status(status: 401) }
-        if preventCaching {
-            configuration.URLCache = nil
-        }
         let session = NSURLSession(configuration: configuration)
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
