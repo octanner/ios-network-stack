@@ -11,16 +11,6 @@ import Marshal
 
 public struct Network {
     
-    // MARK: - Definitions
-    
-    private static let knownErrorStatusCodes = [
-        400: "Bad Request",
-        401: "Authentication Required",
-        403: "Forbidden",
-        404: "Not Found",
-        500: "Internal Server Error",
-    ]
-    
     public typealias ResponseCompletion = Result<JSONObject> -> Void
     
     
@@ -47,12 +37,8 @@ public struct Network {
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
             case .Status(let status):
-                if let errorMessage = knownErrorStatusCodes[status] {
-                    return "\(status) \(errorMessage)"
-                }
-                else {
-                    return "Unknown Network Error. Status: \(status))"
-                }
+                let errorMessage = NSHTTPURLResponse.localizedStringForStatusCode(status)
+                return "\(status) \(errorMessage)"
             case .NoData:
                 return "Response returned with no data"
             }
