@@ -19,7 +19,7 @@ extension NSDate: ValueType {
             }
             return date
         }
-        // handle NSDate objects
+            // handle NSDate objects
         else if let date = object as? NSDate {
             return date
         }
@@ -31,23 +31,29 @@ extension NSDate: ValueType {
 
 public extension NSDate {
     
-    static private let ISO8601MillisecondFormatter:NSDateFormatter = {
+    static private let ISO8601MillisecondFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
         let tz = NSTimeZone(abbreviation:"GMT")
         formatter.timeZone = tz
         return formatter
     }()
     
-    static private let ISO8601SecondFormatter:NSDateFormatter = {
+    static private let ISO8601SecondFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         let tz = NSTimeZone(abbreviation:"GMT")
         formatter.timeZone = tz
         return formatter
     }()
     
-    static private let formatters = [ISO8601MillisecondFormatter, ISO8601SecondFormatter]
+    static private let ISO8601YearMonthDayFormatter: NSDateFormatter = {
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+    
+    static private let formatters = [ISO8601MillisecondFormatter, ISO8601SecondFormatter, ISO8601YearMonthDayFormatter]
     
     static func fromISO8601String(dateString:String) -> NSDate? {
         for formatter in formatters {
