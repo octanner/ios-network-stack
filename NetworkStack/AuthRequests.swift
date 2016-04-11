@@ -21,7 +21,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     // MARK: - Types
     
-    enum Error: ErrorType {
+    public enum Error: ErrorType {
         case RefreshTokenMissing
     }
     
@@ -162,6 +162,7 @@ public struct AuthAPIRequests: AuthRequests {
         guard let appNetworkState = AppNetworkState.currentAppState else { return }
         NSURLCache.sharedURLCache().removeAllCachedResponses()
         appNetworkState.deleteToken()
+        appNetworkState.deleteClient()
     }
 
 }
