@@ -64,6 +64,24 @@ public struct AppNetworkState {
         }
         return nil
     }
+    public var refreshToken: String? {
+        do {
+            let token = try OAuth2Token(key: environmentKey)
+            return token.refreshToken
+        } catch {
+            print(error)
+        }
+        return nil
+    }
+    public var client: (id: String, secret: String)? {
+        do {
+            let client = try OAuth2Client(key: environmentKey)
+            return (id: client.id, secret: client.secret)
+        } catch {
+            print(error)
+        }
+        return nil
+    }
     
     
     // MARK: - Private shared instance
