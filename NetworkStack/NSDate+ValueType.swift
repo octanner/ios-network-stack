@@ -19,6 +19,12 @@ extension NSDate: ValueType {
             }
             return date
         }
+        else if let dateMilliseconds = object as? Int {
+            let dateSeconds = dateMilliseconds / 1000
+            let dateInterval = NSTimeInterval(dateSeconds)
+            let date = NSDate(timeIntervalSince1970: dateInterval)
+            return date
+        }
             // handle NSDate objects
         else if let date = object as? NSDate {
             return date
