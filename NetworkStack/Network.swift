@@ -121,7 +121,7 @@ private extension Network {
                 }
                 do {
                     if data.length > 0 {
-                        let responseObject = try JSONParser.JSONObjectWithData(data)
+                        let responseObject = try JSONParser.JSONObjectGuaranteed(data)
                         self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
                     } else {
                         self.finalizeNetworkCall(result: .Ok(JSONObject()), completion: completion)
@@ -156,6 +156,20 @@ private extension Network {
             return queryItems
         }
         return nil
+    }
+    
+}
+
+
+private extension JSONParser {
+    
+    public static func JSONObjectGuaranteed(data: NSData) throws -> JSONObject {
+        let obj: Any = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+        if let array = obj as? [JSONObject] {
+            return [ "data": array ]
+        } else {
+            return try JSONObject.value(obj)
+        }
     }
     
 }
