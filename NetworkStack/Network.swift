@@ -30,6 +30,9 @@ public struct Network {
         /// Response came back with no data
         case NoData
         
+        /// Response timed out
+        case Timeout
+        
         public var description: String {
             switch self {
             case .MalformedEndpoint(let endpoint):
@@ -41,6 +44,8 @@ public struct Network {
                 return "\(status) \(errorMessage)"
             case .NoData:
                 return "Response returned with no data"
+            case .Timeout:
+                return "Response timed out"
             }
         }
     }
@@ -110,6 +115,10 @@ private extension Network {
         }
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
+            if let error = error where error.code = -1001 {
+                self.finalizeNetworkCall(result: .Error(Error.Timeout, completion: completion))
+                return
+            }
             guard let response = response as? NSHTTPURLResponse else {
                 self.finalizeNetworkCall(result: .Error(Error.ResponseNotValidHTTP), completion: completion)
                 return
