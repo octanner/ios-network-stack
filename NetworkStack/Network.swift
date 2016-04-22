@@ -115,8 +115,8 @@ private extension Network {
         }
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
-            if let error = error where error.code = -1001 {
-                self.finalizeNetworkCall(result: .Error(Error.Timeout, completion: completion))
+            if let error = error where error.code == NSURLErrorTimedOut {
+                self.finalizeNetworkCall(result: .Error(Error.Timeout), completion: completion)
                 return
             }
             guard let response = response as? NSHTTPURLResponse else {
