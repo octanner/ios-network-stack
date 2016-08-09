@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import DVR
 import Marshal
 
 public protocol AuthRequests {
@@ -35,6 +36,26 @@ public struct AuthAPIRequests: AuthRequests {
     
     var network = Network()
     
+    private var defaultSession: NSURLSession {
+        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
+        configuration.timeoutIntervalForRequest = 10.0
+        return NSURLSession(configuration: configuration)
+    }
+    
+    var activeSession: NSURLSession {
+        return staticNetwork ? staticSession : defaultSession
+    }
+    
+    private var staticSession: NSURLSession {
+        let url = NSURL(string: NSProcessInfo.processInfo().environment["cassette"]!)!
+        return Session(cassetteURL: url)
+    }
+    
+    private var staticNetwork: Bool {
+        return NSProcessInfo.processInfo().environment["cassette"] != nil
+    }
+    
     
     // MARK: - Public API
     
@@ -54,11 +75,7 @@ public struct AuthAPIRequests: AuthRequests {
         
         NSURLCache.sharedURLCache().removeAllCachedResponses()
 
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
-        configuration.timeoutIntervalForRequest = 10.0
-        let session = NSURLSession(configuration: configuration)
-        
+        let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
             case let .Ok(json):
@@ -92,11 +109,7 @@ public struct AuthAPIRequests: AuthRequests {
         
         NSURLCache.sharedURLCache().removeAllCachedResponses()
         
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
-        configuration.timeoutIntervalForRequest = 10.0
-        let session = NSURLSession(configuration: configuration)
-        
+        let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
             case let .Ok(json):
@@ -132,11 +145,7 @@ public struct AuthAPIRequests: AuthRequests {
         
         NSURLCache.sharedURLCache().removeAllCachedResponses()
         
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
-        configuration.timeoutIntervalForRequest = 10.0
-        let session = NSURLSession(configuration: configuration)
-        
+        let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
             case let .Ok(json):
