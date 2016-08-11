@@ -93,7 +93,6 @@ public struct AuthAPIRequests: AuthRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     public func authenticate(pairingCode: String, completion: Network.ResponseCompletion) {
-        guard let deviceUUID = UIDevice.currentDevice().identifierForVendor else { fatalError("Device must have an identifier to log in") }
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
             let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
@@ -103,7 +102,7 @@ public struct AuthAPIRequests: AuthRequests {
         let parameters = [
             "client_id": pairingCode,
             "grant_type": "device",
-            "device_id" : deviceUUID.UUIDString,
+            "device_id" : UIDevice.currentIdentifier,
             "device_name" : UIDevice.currentDevice().name
         ]
         
@@ -172,6 +171,23 @@ public struct AuthAPIRequests: AuthRequests {
         NSURLCache.sharedURLCache().removeAllCachedResponses()
         appNetworkState.deleteToken()
         appNetworkState.deleteClient()
+    }
+
+}
+
+
+extension UIDevice {
+
+    static var isSimulator: Bool {
+        return NSProcessInfo.processInfo().environment.keys.contains("SIMULATOR_DEVICE_NAME")
+    }
+
+    static var currentIdentifier: String {
+        if isSimulator {
+            return "5F21210D-3600-418E-BF37-ABA206DD0AFF"
+        } else {
+            return UIDevice.currentDevice().identifierForVendor!.UUIDString
+        }
     }
 
 }
