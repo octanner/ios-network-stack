@@ -44,16 +44,12 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     var activeSession: NSURLSession {
-        return staticNetwork ? staticSession : defaultSession
+        return fakeSession ?? defaultSession
     }
     
-    private var staticSession: NSURLSession {
-        let url = NSURL(string: NSProcessInfo.processInfo().environment["cassette"]!)!
-        return Session(cassetteURL: url)
-    }
-    
-    private var staticNetwork: Bool {
-        return NSProcessInfo.processInfo().environment["cassette"] != nil
+    private var fakeSession: NSURLSession? {
+        guard let path = NSProcessInfo.processInfo().environment["cassette"] else { return nil }
+        return Session(cassetteURL: NSURL(string: path)!)
     }
     
     
