@@ -109,6 +109,7 @@ private extension Network {
         request.HTTPMethod = requestType.rawValue
         do {
             request.HTTPBody = try parameters?.jsonData()
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } catch {
             completion(.Error(error))
             return
