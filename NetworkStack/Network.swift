@@ -109,6 +109,7 @@ private extension Network {
         request.HTTPMethod = requestType.rawValue
         do {
             request.HTTPBody = try parameters?.jsonData()
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } catch {
             completion(.Error(error))
             return
@@ -172,7 +173,7 @@ private extension Network {
 
 private extension JSONParser {
     
-    public static func JSONObjectGuaranteed(data: NSData) throws -> JSONObject {
+    private static func JSONObjectGuaranteed(data: NSData) throws -> JSONObject {
         let obj: Any = try NSJSONSerialization.JSONObjectWithData(data, options: [])
         if let array = obj as? [JSONObject] {
             return [ "data": array ]
