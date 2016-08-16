@@ -39,7 +39,13 @@ public struct NetworkAPIRequests: NetworkRequests {
         configuration.timeoutIntervalForRequest = 10.0
         return NSURLSession(configuration: configuration)
     }
+
+    private var activeSession: NSURLSession? {
+        return overrideSession ?? defaultSession
+    }
     
+    public var overrideSession: NSURLSession?
+
     
     // MARK: - Public API
     
@@ -104,7 +110,7 @@ private extension NetworkAPIRequests {
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let session = defaultSession else { throw Network.Error.Status(status: 401) }
+        guard let session = activeSession else { throw Network.Error.Status(status: 401) }
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }

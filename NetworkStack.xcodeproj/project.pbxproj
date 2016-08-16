@@ -20,7 +20,6 @@
 		AFBED27A1C7E68E600622331 /* NSDate+ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */; };
 		B06646A41C7E4707000CCBC5 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */; };
 		B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */; };
-		B0AE76351D59444E0098763A /* DVR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE76341D59444E0098763A /* DVR.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,7 +49,6 @@
 		AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+ValueType.swift"; sourceTree = "<group>"; };
 		B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuth2Client.swift; sourceTree = "<group>"; };
 		B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNetworkState.swift; sourceTree = "<group>"; };
-		B0AE76341D59444E0098763A /* DVR.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVR.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/greatwork-bjuwgalqseyjefalehkaykjfrfkl/Build/Products/Debug-iphonesimulator/DVR.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +56,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0AE76351D59444E0098763A /* DVR.framework in Frameworks */,
 				AFBED2781C7E651900622331 /* Marshal.framework in Frameworks */,
 				701762A01C6D1230008D42C6 /* SimpleKeychain.framework in Frameworks */,
 			);
@@ -78,7 +75,6 @@
 		701762791C6D117D008D42C6 = {
 			isa = PBXGroup;
 			children = (
-				B0AE76341D59444E0098763A /* DVR.framework */,
 				701762851C6D117D008D42C6 /* NetworkStack */,
 				701762911C6D117D008D42C6 /* NetworkStackTests */,
 				701762841C6D117D008D42C6 /* Products */,

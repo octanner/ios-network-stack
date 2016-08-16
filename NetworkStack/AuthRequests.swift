@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import DVR
 import Marshal
 
 public protocol AuthRequests {
@@ -43,15 +42,12 @@ public struct AuthAPIRequests: AuthRequests {
         return NSURLSession(configuration: configuration)
     }
     
-    var activeSession: NSURLSession {
-        return fakeSession ?? defaultSession
+    private var activeSession: NSURLSession {
+        return overrideSession ?? defaultSession
     }
     
-    private var fakeSession: NSURLSession? {
-        guard let path = NSProcessInfo.processInfo().environment["cassette"] else { return nil }
-        return Session(cassetteURL: NSURL(string: path)!)
-    }
-    
+    public var overrideSession: NSURLSession?
+
     
     // MARK: - Public API
     
