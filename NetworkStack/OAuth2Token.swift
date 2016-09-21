@@ -12,34 +12,15 @@ import SimpleKeychain
 
 struct OAuth2Token: Unmarshaling {
 
-    // MARK: - Error
-
-    enum OAuth2TokenError: Error {
-        case typeMismatch
-    }
-
-
-    // MARK: - Internal properties
-    
     let accessToken: String
     let expiresAt: Date
     let refreshToken: String?
     
-    
-    // MARK: - Private properties
-
-    fileprivate static let keychain = Keychain()
-    
-    
-    // MARK: - Constants
-    
-    fileprivate static let accessTokenKey = "access_token"
-    fileprivate static let expiresAtKey = "expires_at"
-    fileprivate static let expiresInKey = "expires_in"
-    fileprivate static let refreshTokenKey = "refresh_token"
-    
-    
-    // MARK: - Initializers
+    private static let keychain = Keychain()
+    private static let accessTokenKey = "access_token"
+    private static let expiresAtKey = "expires_at"
+    private static let expiresInKey = "expires_in"
+    private static let refreshTokenKey = "refresh_token"
     
     init(accessToken: String, expiresAt: Date = Date.distantFuture, refreshToken: String? = nil) {
         self.accessToken = accessToken
@@ -62,9 +43,6 @@ struct OAuth2Token: Unmarshaling {
         self.refreshToken = try dictionary <| OAuth2Token.refreshTokenKey
     }
     
-    
-    // MARK: - Public functions
-
     func lock(_ key: String) throws {
         let tokenValues: NSDictionary = [
             OAuth2Token.accessTokenKey: accessToken as AnyObject,
@@ -77,15 +55,8 @@ struct OAuth2Token: Unmarshaling {
     static func delete(_ key: String) {
         OAuth2Token.keychain.deleteValue(forKey: tokenKey(key))
     }
-
-}
-
-
-// MARK: - Private helper functions
-
-private extension OAuth2Token {
-
-    static func tokenKey(_ key: String) -> String {
+    
+    private static func tokenKey(_ key: String) -> String {
         return "\(key).token"
     }
 

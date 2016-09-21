@@ -19,7 +19,7 @@ public struct AppNetworkState {
     }
     
 
-    // MARK: - Shared instance
+    // MARK: - Shared instances
 
     public static var currentAppState: AppNetworkState? {
         get {
@@ -43,6 +43,8 @@ public struct AppNetworkState {
         }
     }
 
+    private static var savedCurrentAppState: AppNetworkState?
+    
 
     // MARK: - Public properties
 
@@ -84,17 +86,12 @@ public struct AppNetworkState {
     }
     
     
-    // MARK: - Private shared instance
-    
-    fileprivate static var savedCurrentAppState: AppNetworkState?
-    
-    
     // MARK: - Constants
 
-    fileprivate static let apiURLStringKey = "NetworkStack.apiURLString"
-    fileprivate static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
-    fileprivate static let environmentKeyKey = "NetworkStack.environmentKey"
-    fileprivate static let appNetworkStateKey = "NetworkStack.appNetworkState"
+    private static let apiURLStringKey = "NetworkStack.apiURLString"
+    private static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
+    private static let environmentKeyKey = "NetworkStack.environmentKey"
+    private static let appNetworkStateKey = "NetworkStack.appNetworkState"
     
 
     // MARK: - Initializers
@@ -115,12 +112,8 @@ public struct AppNetworkState {
         self.environmentKey = environmentKey
     }
     
-}
-
-
-// MARK: - Internal helper functions
-
-extension AppNetworkState {
+    
+    // MARK: - Internal helper functions
 
     func urlForEndpoint(_ endpoint: String) -> URL? {
         guard let baseURL = URL(string: apiURLString) else { return nil }
@@ -134,7 +127,7 @@ extension AppNetworkState {
 
     func saveClient(_ json: JSONObject) throws {
         let client = try OAuth2Client(object: json)
-        try client.lock(environmentKey)
+        try client.lock(with: environmentKey)
     }
     
     func deleteToken() {
@@ -142,17 +135,13 @@ extension AppNetworkState {
     }
     
     func deleteClient() {
-        OAuth2Client.delete(environmentKey)
+        OAuth2Client.delete(with: environmentKey)
     }
 
-}
 
+    // MARK: - Private functions
 
-// MARK: - Private functions
-
-private extension AppNetworkState {
-
-    static func persistState() {
+    private static func persistState() {
         guard let currentState = savedCurrentAppState else { return }
         var dictionary = [String: AnyObject]()
         dictionary[apiURLStringKey] = currentState.apiURLString as AnyObject?

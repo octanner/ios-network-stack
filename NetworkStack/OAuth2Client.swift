@@ -12,31 +12,13 @@ import SimpleKeychain
 
 struct OAuth2Client: Unmarshaling {
     
-    // MARK: - Error
-    
-    enum OAuth2ClientError: Error {
-        case typeMismatch
-    }
-    
-    
-    // MARK: - Internal properties
-    
     let id: String
     let secret: String
     
+    private static let keychain = Keychain()
+    private static let idKey = "client_id"
+    private static let secretKey = "client_secret"
     
-    // MARK: - Private properties
-    
-    fileprivate static let keychain = Keychain()
-    
-    
-    // MARK: - Constants
-    
-    fileprivate static let idKey = "client_id"
-    fileprivate static let secretKey = "client_secret"
-    
-    
-    // MARK: - Initializers
     
     init(id: String, secret: String) {
         self.id = id
@@ -53,10 +35,7 @@ struct OAuth2Client: Unmarshaling {
         try self.init(object: dictionary)
     }
     
-    
-    // MARK: - Public functions
-    
-    func lock(_ key: String) throws {
+    func lock(with key: String) throws {
         let clientValues: NSDictionary = [
             OAuth2Client.idKey: id as AnyObject,
             OAuth2Client.secretKey: secret as AnyObject
@@ -64,18 +43,11 @@ struct OAuth2Client: Unmarshaling {
         try OAuth2Client.keychain.set(clientValues, forKey: OAuth2Client.clientKey(key))
     }
     
-    static func delete(_ key: String) {
+    static func delete(with key: String) {
         OAuth2Client.keychain.deleteValue(forKey: clientKey(key))
     }
     
-}
-
-
-// MARK: - Private helper functions
-
-private extension OAuth2Client {
-    
-    static func clientKey(_ key: String) -> String {
+    private static func clientKey(_ key: String) -> String {
         return "\(key).oauthClient"
     }
     

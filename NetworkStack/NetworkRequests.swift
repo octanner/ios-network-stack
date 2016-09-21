@@ -18,18 +18,10 @@ public protocol NetworkRequests {
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
-
-    // MARK: - Public initializer
-
-    public init() { }
-
     
-    // MARK: - Internal properties
+    // MARK: - Properties
     
     var network = Network()
-    
-    
-    // MARK: - Private properties
     
     fileprivate var defaultSession: URLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
@@ -46,6 +38,11 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     public var overrideSession: URLSession?
 
+    
+    // MARK: - Initializers
+    
+    public init() { }
+    
     
     // MARK: - Public API
     
@@ -100,15 +97,11 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
     
-}
 
+    // MARK: - Private functions
 
-// MARK: - Private functions
-
-private extension NetworkAPIRequests {
-    
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    func config(endpoint: String) throws -> (session: URLSession, url: URL) {
+    private func config(endpoint: String) throws -> (session: URLSession, url: URL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
         guard let session = activeSession else { throw NetworkError.status(status: 401) }
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }

@@ -98,14 +98,10 @@ public struct Network {
         performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
     }
 
-}
-
-
-// MARK: - Private functions
-
-private extension Network {
     
-    func performNetworkCall(_ requestType: RequestType, url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    // MARK: - Private functions
+    
+    private func performNetworkCall(_ requestType: RequestType, url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         var request = URLRequest(url: url)
         request.httpMethod = requestType.rawValue
         do {
