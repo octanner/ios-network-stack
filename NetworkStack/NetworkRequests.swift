@@ -10,11 +10,11 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func post(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func patch(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func put(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func delete(_ endpoint: String, completion: @escaping Network.ResponseCompletion)
+    func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion)
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -46,50 +46,50 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Public API
     
-    public func get(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
-            network.get(url, session: session, parameters: parameters, completion: completion)
+            network.get(from: url, using: session, with: parameters, completion: completion)
         }
         catch {
             completion(.error(error))
         }
     }
     
-    public func post(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
-            network.post(url, session: session, parameters: parameters, completion: completion)
+            network.post(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
             completion(.error(error))
         }
     }
     
-    public func patch(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
-            network.patch(url, session: session, parameters: parameters, completion: completion)
+            network.patch(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
             completion(.error(error))
         }
     }
     
-    public func put(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
-            network.put(url, session: session, parameters: parameters, completion: completion)
+            network.put(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
             completion(.error(error))
         }
     }
     
-    public func delete(_ endpoint: String, completion: @escaping Network.ResponseCompletion) {
+    public func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
-            network.delete(url, session: session, completion: completion)
+            network.delete(at: url, using: session, completion: completion)
         }
             
         catch {

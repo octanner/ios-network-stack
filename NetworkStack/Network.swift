@@ -55,11 +55,11 @@ public struct Network {
     // MARK: - Enums
     
     enum RequestType: String {
-        case GET
-        case POST
-        case PATCH
-        case PUT
-        case DELETE
+        case get
+        case post
+        case patch
+        case put
+        case delete
     }
     
     
@@ -70,7 +70,7 @@ public struct Network {
     
     // MARK: - Public API
     
-    public func get(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func get(from url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         let _url: URL
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems(parameters)
@@ -79,29 +79,29 @@ public struct Network {
         } else {
             _url = url
         }
-        performNetworkCall(.GET, url: _url, session: session, parameters: nil, completion: completion)
+        perform(action: .get, at: _url, using: session, with: nil, completion: completion)
     }
     
-    public func post(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
-        performNetworkCall(.POST, url: url, session: session, parameters: parameters, completion: completion)
+    public func post(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        perform(action: .post, at: url, using: session, with: parameters, completion: completion)
     }
     
-    public func patch(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
-        performNetworkCall(.PATCH, url: url, session: session, parameters: parameters, completion: completion)
+    public func patch(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        perform(action: .patch, at: url, using: session, with: parameters, completion: completion)
     }
 
-    public func put(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
-        performNetworkCall(.PUT, url: url, session: session, parameters: parameters, completion: completion)
+    public func put(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        perform(action: .put, at: url, using: session, with: parameters, completion: completion)
     }
 
-    public func delete(_ url: URL, session: URLSession, completion: @escaping Network.ResponseCompletion) {
-        performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
+    public func delete(at url: URL, using session: URLSession, completion: @escaping Network.ResponseCompletion) {
+        perform(action: .delete, at: url, using: session, with: nil, completion: completion)
     }
 
     
     // MARK: - Private functions
     
-    private func performNetworkCall(_ requestType: RequestType, url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    private func perform(action requestType: RequestType, at url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         var request = URLRequest(url: url)
         request.httpMethod = requestType.rawValue
         do {

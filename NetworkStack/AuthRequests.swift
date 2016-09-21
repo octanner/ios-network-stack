@@ -9,10 +9,20 @@
 import Foundation
 import Marshal
 
+public struct Credentials {
+    public var username: String
+    public var password: String
+    
+    public init(username: String, password: String) {
+        self.username = username
+        self.password = password
+    }
+}
+
 public protocol AuthRequests {
-    func authenticate(username: String, password: String, completion: @escaping Network.ResponseCompletion)
-    func authenticate(pairingCode: String, completion: @escaping Network.ResponseCompletion)
-    func authenticate(tokenJSON: JSONObject) throws
+    func authenticate(with credentials: Credentials, completion: @escaping Network.ResponseCompletion)
+    func authenticate(with pairingCode: String, completion: @escaping Network.ResponseCompletion)
+    func authenticate(with tokenJSON: JSONObject) throws
     func refreshToken(completion: @escaping Network.ResponseCompletion)
     func logOut()
 }
@@ -52,7 +62,7 @@ public struct AuthAPIRequests: AuthRequests {
     // MARK: - Public API
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(username: String, password: String, completion: @escaping Network.ResponseCompletion) {
+    public func authenticate(with credentials: Credentials, completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
@@ -61,14 +71,14 @@ public struct AuthAPIRequests: AuthRequests {
         }
         let parameters = [
             "grant_type": "password",
-            "username": username,
-            "password": password
+            "username": credentials.username,
+            "password": credentials.password
         ]
         
         URLCache.shared.removeAllCachedResponses()
 
         let session = activeSession
-        network.post(url, session: session, parameters: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result in
             switch result {
             case let .ok(json):
                 do {
@@ -84,7 +94,7 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(pairingCode: String, completion: @escaping Network.ResponseCompletion) {
+    public func authenticate(with pairingCode: String, completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
@@ -101,7 +111,7 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
-        network.post(url, session: session, parameters: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result in
             switch result {
             case let .ok(json):
                 do {
@@ -137,7 +147,7 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
-        network.post(url, session: session, parameters: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result in
             switch result {
             case let .ok(json):
                 do {
@@ -153,7 +163,7 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(tokenJSON: JSONObject) throws {
+    public func authenticate(with tokenJSON: JSONObject) throws {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         try appNetworkState.saveToken(tokenJSON)
     }
