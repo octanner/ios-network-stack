@@ -14,8 +14,8 @@ public struct AppNetworkState {
     
     // MARK: - Error
     
-    enum Error: ErrorType {
-        case TypeMismatch
+    enum AppNetworkStateError: Error {
+        case typeMismatch
     }
     
 
@@ -26,7 +26,7 @@ public struct AppNetworkState {
             if let currentState = savedCurrentAppState {
                 return currentState
             }
-            if let dictionary = NSUserDefaults.standardUserDefaults().objectForKey(AppNetworkState.appNetworkStateKey) as? [String: AnyObject] {
+            if let dictionary = UserDefaults.standard.object(forKey: AppNetworkState.appNetworkStateKey) as? [String: AnyObject] {
                 do {
                     let state = try AppNetworkState(dictionary: dictionary)
                     savedCurrentAppState = state
@@ -56,7 +56,7 @@ public struct AppNetworkState {
     public var accessToken: String? {
         do {
             let token = try OAuth2Token(key: environmentKey)
-            if NSDate().compare(token.expiresAt) == .OrderedAscending {
+            if Date().compare(token.expiresAt) == .orderedAscending {
                 return token.accessToken
             }
         } catch {
@@ -86,15 +86,15 @@ public struct AppNetworkState {
     
     // MARK: - Private shared instance
     
-    private static var savedCurrentAppState: AppNetworkState?
+    fileprivate static var savedCurrentAppState: AppNetworkState?
     
     
     // MARK: - Constants
 
-    private static let apiURLStringKey = "NetworkStack.apiURLString"
-    private static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
-    private static let environmentKeyKey = "NetworkStack.environmentKey"
-    private static let appNetworkStateKey = "NetworkStack.appNetworkState"
+    fileprivate static let apiURLStringKey = "NetworkStack.apiURLString"
+    fileprivate static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
+    fileprivate static let environmentKeyKey = "NetworkStack.environmentKey"
+    fileprivate static let appNetworkStateKey = "NetworkStack.appNetworkState"
     
 
     // MARK: - Initializers
@@ -106,9 +106,9 @@ public struct AppNetworkState {
     }
     
     init(dictionary: [String: AnyObject]) throws {
-        guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw Error.TypeMismatch }
-        guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw Error.TypeMismatch }
-        guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw Error.TypeMismatch }
+        guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
+        guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
+        guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
         
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
@@ -122,17 +122,17 @@ public struct AppNetworkState {
 
 extension AppNetworkState {
 
-    func urlForEndpoint(endpoint: String) -> NSURL? {
-        guard let baseURL = NSURL(string: apiURLString) else { return nil }
-        return NSURL(string: endpoint, relativeToURL: baseURL)
+    func urlForEndpoint(_ endpoint: String) -> URL? {
+        guard let baseURL = URL(string: apiURLString) else { return nil }
+        return URL(string: endpoint, relativeTo: baseURL)
     }
 
-    func saveToken(json: JSONObject) throws {
+    func saveToken(_ json: JSONObject) throws {
         let token = try OAuth2Token(object: json)
         try token.lock(environmentKey)
     }
 
-    func saveClient(json: JSONObject) throws {
+    func saveClient(_ json: JSONObject) throws {
         let client = try OAuth2Client(object: json)
         try client.lock(environmentKey)
     }
@@ -155,11 +155,11 @@ private extension AppNetworkState {
     static func persistState() {
         guard let currentState = savedCurrentAppState else { return }
         var dictionary = [String: AnyObject]()
-        dictionary[apiURLStringKey] = currentState.apiURLString
-        dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
-        dictionary[environmentKeyKey] = currentState.environmentKey
+        dictionary[apiURLStringKey] = currentState.apiURLString as AnyObject?
+        dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString as AnyObject?
+        dictionary[environmentKeyKey] = currentState.environmentKey as AnyObject?
         
-        NSUserDefaults.standardUserDefaults().setObject(dictionary, forKey: appNetworkStateKey)
+        UserDefaults.standard.set(dictionary, forKey: appNetworkStateKey)
     }
     
 }

@@ -14,43 +14,43 @@ struct OAuth2Token: Unmarshaling {
 
     // MARK: - Error
 
-    enum Error: ErrorType {
-        case TypeMismatch
+    enum OAuth2TokenError: Error {
+        case typeMismatch
     }
 
 
     // MARK: - Internal properties
     
     let accessToken: String
-    let expiresAt: NSDate
+    let expiresAt: Date
     let refreshToken: String?
     
     
     // MARK: - Private properties
 
-    private static let keychain = Keychain()
+    fileprivate static let keychain = Keychain()
     
     
     // MARK: - Constants
     
-    private static let accessTokenKey = "access_token"
-    private static let expiresAtKey = "expires_at"
-    private static let expiresInKey = "expires_in"
-    private static let refreshTokenKey = "refresh_token"
+    fileprivate static let accessTokenKey = "access_token"
+    fileprivate static let expiresAtKey = "expires_at"
+    fileprivate static let expiresInKey = "expires_in"
+    fileprivate static let refreshTokenKey = "refresh_token"
     
     
     // MARK: - Initializers
     
-    init(accessToken: String, expiresAt: NSDate = NSDate.distantFuture(), refreshToken: String? = nil) {
+    init(accessToken: String, expiresAt: Date = Date.distantFuture, refreshToken: String? = nil) {
         self.accessToken = accessToken
         self.expiresAt = expiresAt
         self.refreshToken = refreshToken
     }
     
-    init(object: JSONObject) throws {
+    init(object: MarshaledObject) throws {
         self.accessToken = try object <| OAuth2Token.accessTokenKey
-        let expiresIn: NSTimeInterval = try object <| OAuth2Token.expiresInKey
-        self.expiresAt = NSDate(timeIntervalSinceNow: expiresIn)
+        let expiresIn: TimeInterval = try object <| OAuth2Token.expiresInKey
+        self.expiresAt = Date(timeIntervalSinceNow: expiresIn)
         self.refreshToken = try object <| OAuth2Token.refreshTokenKey
     }
 
@@ -65,16 +65,16 @@ struct OAuth2Token: Unmarshaling {
     
     // MARK: - Public functions
 
-    func lock(key: String) throws {
-        let tokenValues: [String: AnyObject] = [
-            OAuth2Token.accessTokenKey: accessToken,
-            OAuth2Token.expiresAtKey: expiresAt,
-            OAuth2Token.refreshTokenKey: refreshToken ?? ""
+    func lock(_ key: String) throws {
+        let tokenValues: NSDictionary = [
+            OAuth2Token.accessTokenKey: accessToken as AnyObject,
+            OAuth2Token.expiresAtKey: expiresAt as AnyObject,
+            OAuth2Token.refreshTokenKey: refreshToken as AnyObject? ?? "" as AnyObject
         ]
         try OAuth2Token.keychain.set(tokenValues, forKey: OAuth2Token.tokenKey(key))
     }
 
-    static func delete(key: String) {
+    static func delete(_ key: String) {
         OAuth2Token.keychain.deleteValue(forKey: tokenKey(key))
     }
 
@@ -85,7 +85,7 @@ struct OAuth2Token: Unmarshaling {
 
 private extension OAuth2Token {
 
-    static func tokenKey(key: String) -> String {
+    static func tokenKey(_ key: String) -> String {
         return "\(key).token"
     }
 

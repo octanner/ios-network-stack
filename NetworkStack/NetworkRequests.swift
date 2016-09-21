@@ -10,11 +10,11 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
-    func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
-    func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
-    func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion)
-    func delete(endpoint: String, completion: Network.ResponseCompletion)
+    func get(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func post(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func patch(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func put(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func delete(_ endpoint: String, completion: @escaping Network.ResponseCompletion)
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -31,72 +31,72 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     // MARK: - Private properties
     
-    private var defaultSession: NSURLSession? {
+    fileprivate var defaultSession: URLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = appNetworkState.accessToken else { return nil }
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
         configuration.timeoutIntervalForRequest = 10.0
-        return NSURLSession(configuration: configuration)
+        return URLSession(configuration: configuration)
     }
 
-    private var activeSession: NSURLSession? {
+    fileprivate var activeSession: URLSession? {
         return overrideSession ?? defaultSession
     }
     
-    public var overrideSession: NSURLSession?
+    public var overrideSession: URLSession?
 
     
     // MARK: - Public API
     
-    public func get(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func get(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint: endpoint)
             network.get(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
-            completion(.Error(error))
+            completion(.error(error))
         }
     }
     
-    public func post(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func post(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint: endpoint)
             network.post(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
-            completion(.Error(error))
+            completion(.error(error))
         }
     }
     
-    public func patch(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func patch(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint: endpoint)
             network.patch(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
-            completion(.Error(error))
+            completion(.error(error))
         }
     }
     
-    public func put(endpoint: String, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func put(_ endpoint: String, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint: endpoint)
             network.put(url, session: session, parameters: parameters, completion: completion)
         }
         catch {
-            completion(.Error(error))
+            completion(.error(error))
         }
     }
     
-    public func delete(endpoint: String, completion: Network.ResponseCompletion) {
+    public func delete(_ endpoint: String, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint)
+            let (session, url) = try config(endpoint: endpoint)
             network.delete(url, session: session, completion: completion)
         }
             
         catch {
-            completion(.Error(error))
+            completion(.error(error))
         }
     }
     
@@ -108,10 +108,10 @@ public struct NetworkAPIRequests: NetworkRequests {
 private extension NetworkAPIRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
+    func config(endpoint: String) throws -> (session: URLSession, url: URL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let session = activeSession else { throw Network.Error.Status(status: 401) }
-        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
+        guard let session = activeSession else { throw NetworkError.status(status: 401) }
+        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
     

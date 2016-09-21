@@ -9,46 +9,47 @@
 import Foundation
 import Marshal
 
-public struct Network {
+// MARK: - Error
+
+public enum NetworkError: Error, CustomStringConvertible {
     
-    public typealias ResponseCompletion = Result<JSONObject> -> Void
+    /// Attempted to request a malformed API endpoint
+    case malformedEndpoint(endpoint: String)
     
+    /// Recieved an invalid response from the server.
+    case responseNotValidHTTP
     
-    // MARK: - Error
+    /// HTTP Error status code
+    case status(status: Int)
     
-    public enum Error: ErrorType, CustomStringConvertible {
-        
-        /// Attempted to request a malformed API endpoint
-        case MalformedEndpoint(endpoint: String)
-        
-        /// Recieved an invalid response from the server.
-        case ResponseNotValidHTTP
-        
-        /// HTTP Error status code
-        case Status(status: Int)
-        
-        /// Response came back with no data
-        case NoData
-        
-        /// Response timed out
-        case Timeout
-        
-        public var description: String {
-            switch self {
-            case .MalformedEndpoint(let endpoint):
-                return "Attempted to request a malformed API endpoint: \(endpoint)"
-            case .ResponseNotValidHTTP:
-                return "Response was not an HTTP Response."
-            case .Status(let status):
-                let errorMessage = NSHTTPURLResponse.localizedStringForStatusCode(status)
-                return "\(status) \(errorMessage)"
-            case .NoData:
-                return "Response returned with no data"
-            case .Timeout:
-                return "Response timed out"
-            }
+    /// Response came back with no data
+    case noData
+    
+    /// Response timed out
+    case timeout
+    
+    public var description: String {
+        switch self {
+        case .malformedEndpoint(let endpoint):
+            return "Attempted to request a malformed API endpoint: \(endpoint)"
+        case .responseNotValidHTTP:
+            return "Response was not an HTTP Response."
+        case .status(let status):
+            let errorMessage = HTTPURLResponse.localizedString(forStatusCode: status)
+            return "\(status) \(errorMessage)"
+        case .noData:
+            return "Response returned with no data"
+        case .timeout:
+            return "Response timed out"
         }
     }
+    
+}
+
+
+public struct Network {
+    
+    public typealias ResponseCompletion = (Result<JSONObject>) -> Void
     
     
     // MARK: - Enums
@@ -69,11 +70,11 @@ public struct Network {
     
     // MARK: - Public API
     
-    public func get(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
-        let _url: NSURL
-        let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)
+    public func get(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        let _url: URL
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems(parameters)
-        if let componentURL = components?.URL {
+        if let componentURL = components?.url {
             _url = componentURL
         } else {
             _url = url
@@ -81,19 +82,19 @@ public struct Network {
         performNetworkCall(.GET, url: _url, session: session, parameters: nil, completion: completion)
     }
     
-    public func post(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func post(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         performNetworkCall(.POST, url: url, session: session, parameters: parameters, completion: completion)
     }
     
-    public func patch(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func patch(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         performNetworkCall(.PATCH, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func put(url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
+    public func put(_ url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         performNetworkCall(.PUT, url: url, session: session, parameters: parameters, completion: completion)
     }
 
-    public func delete(url: NSURL, session: NSURLSession, completion: Network.ResponseCompletion) {
+    public func delete(_ url: URL, session: URLSession, completion: @escaping Network.ResponseCompletion) {
         performNetworkCall(.DELETE, url: url, session: session, parameters: nil, completion: completion)
     }
 
@@ -104,63 +105,64 @@ public struct Network {
 
 private extension Network {
     
-    func performNetworkCall(requestType: RequestType, url: NSURL, session: NSURLSession, parameters: JSONObject?, completion: Network.ResponseCompletion) {
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = requestType.rawValue
+    func performNetworkCall(_ requestType: RequestType, url: URL, session: URLSession, parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        var request = URLRequest(url: url)
+        request.httpMethod = requestType.rawValue
         do {
-            request.HTTPBody = try parameters?.jsonData()
+            request.httpBody = try parameters?.jsonData()
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } catch {
-            completion(.Error(error))
+            completion(.error(error))
             return
         }
+
         
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if let error = error where error.code == NSURLErrorTimedOut {
-                self.finalizeNetworkCall(result: .Error(Error.Timeout), completion: completion)
+        let task = session.dataTask(with: request, completionHandler: { data, response, error in
+            if let error = error as? NSError, error.code == NSURLErrorTimedOut {
+                self.finalizeNetworkCall(result: .error(NetworkError.timeout), completion: completion)
                 return
             }
-            guard let response = response as? NSHTTPURLResponse else {
-                self.finalizeNetworkCall(result: .Error(Error.ResponseNotValidHTTP), completion: completion)
+            guard let response = response as? HTTPURLResponse else {
+                self.finalizeNetworkCall(result: .error(NetworkError.responseNotValidHTTP), completion: completion)
                 return
             }
-            if case let status = response.statusCode where status >= 200 && status < 300 {
+            if case let status = response.statusCode , status >= 200 && status < 300 {
                 guard let data = data else {
-                    self.finalizeNetworkCall(result: .Error(Error.NoData), completion: completion)
+                    self.finalizeNetworkCall(result: .error(NetworkError.noData), completion: completion)
                     return
                 }
                 do {
-                    if data.length > 0 {
-                        let responseObject = try JSONParser.JSONObjectGuaranteed(data)
-                        self.finalizeNetworkCall(result: .Ok(responseObject), completion: completion)
+                    if data.count > 0 {
+                        let responseObject = try JSONParser.JSONObjectGuaranteed(with: data)
+                        self.finalizeNetworkCall(result: .ok(responseObject), completion: completion)
                     } else {
-                        self.finalizeNetworkCall(result: .Ok(JSONObject()), completion: completion)
+                        self.finalizeNetworkCall(result: .ok(JSONObject()), completion: completion)
                     }
                 }
                 catch {
-                    self.finalizeNetworkCall(result: .Error(error), completion: completion)
+                    self.finalizeNetworkCall(result: .error(error), completion: completion)
                 }
                 
                 
             } else {
-                let networkError = Error.Status(status: response.statusCode)
-                self.finalizeNetworkCall(result: .Error(networkError), completion: completion)
+                let networkError = NetworkError.status(status: response.statusCode)
+                self.finalizeNetworkCall(result: .error(networkError), completion: completion)
             }
-        }
+        }) 
         task.resume()
     }
     
-    func finalizeNetworkCall(result result: Result<JSONObject>, completion: Network.ResponseCompletion) {
-        dispatch_async(dispatch_get_main_queue()) {
+    func finalizeNetworkCall(result: Result<JSONObject>, completion: @escaping Network.ResponseCompletion) {
+        DispatchQueue.main.async {
             completion(result)
         }
     }
     
-    func queryItems(parameters: JSONObject?) -> [NSURLQueryItem]? {
+    func queryItems(_ parameters: JSONObject?) -> [URLQueryItem]? {
         if let parameters = parameters {
-            var queryItems = [NSURLQueryItem]()
+            var queryItems = [URLQueryItem]()
             for (name, value) in parameters {
-                let queryItem = NSURLQueryItem(name: name, value: String(value))
+                let queryItem = URLQueryItem(name: name, value: String(describing: value))
                 queryItems.append(queryItem)
             }
             return queryItems
@@ -173,12 +175,12 @@ private extension Network {
 
 private extension JSONParser {
     
-    private static func JSONObjectGuaranteed(data: NSData) throws -> JSONObject {
-        let obj: Any = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+    static func JSONObjectGuaranteed(with data: Data) throws -> JSONObject {
+        let obj: Any = try JSONSerialization.jsonObject(with: data, options: [])
         if let array = obj as? [JSONObject] {
             return [ "data": array ]
         } else {
-            return try JSONObject.value(obj)
+            return try JSONObject.value(from: obj)
         }
     }
     

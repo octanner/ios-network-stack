@@ -10,10 +10,10 @@ import Foundation
 import Marshal
 
 public protocol AuthRequests {
-    func authenticate(username: String, password: String, completion: Network.ResponseCompletion)
-    func authenticate(pairingCode: String, completion: Network.ResponseCompletion)
+    func authenticate(username: String, password: String, completion: @escaping Network.ResponseCompletion)
+    func authenticate(pairingCode: String, completion: @escaping Network.ResponseCompletion)
     func authenticate(tokenJSON: JSONObject) throws
-    func refreshToken(completion: Network.ResponseCompletion)
+    func refreshToken(completion: @escaping Network.ResponseCompletion)
     func logOut()
 }
 
@@ -21,8 +21,8 @@ public struct AuthAPIRequests: AuthRequests {
     
     // MARK: - Types
     
-    public enum Error: ErrorType {
-        case RefreshTokenMissing
+    public enum AuthError: Error {
+        case refreshTokenMissing
     }
     
 
@@ -35,28 +35,28 @@ public struct AuthAPIRequests: AuthRequests {
     
     var network = Network()
     
-    private var defaultSession: NSURLSession {
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
+    fileprivate var defaultSession: URLSession {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = ["content-type": "application/json"]
         configuration.timeoutIntervalForRequest = 10.0
-        return NSURLSession(configuration: configuration)
+        return URLSession(configuration: configuration)
     }
     
-    private var activeSession: NSURLSession {
+    fileprivate var activeSession: URLSession {
         return overrideSession ?? defaultSession
     }
     
-    public var overrideSession: NSURLSession?
+    public var overrideSession: URLSession?
 
     
     // MARK: - Public API
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(username: String, password: String, completion: Network.ResponseCompletion) {
+    public func authenticate(username: String, password: String, completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
-            let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.Error(error))
+        guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
+            let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
+            completion(.error(error))
             return
         }
         let parameters = [
@@ -65,64 +65,64 @@ public struct AuthAPIRequests: AuthRequests {
             "password": password
         ]
         
-        NSURLCache.sharedURLCache().removeAllCachedResponses()
+        URLCache.shared.removeAllCachedResponses()
 
         let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
-            case let .Ok(json):
+            case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
                     completion(result)
                 } catch {
-                    completion(.Error(error))
+                    completion(.error(error))
                 }
-            case .Error:
+            case .error:
                 completion(result)
             }
         }
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(pairingCode: String, completion: Network.ResponseCompletion) {
+    public func authenticate(pairingCode: String, completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
-            let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.Error(error))
+        guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
+            let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
+            completion(.error(error))
             return
         }
         let parameters = [
             "client_id": pairingCode,
             "grant_type": "device",
             "device_id" : UIDevice.currentIdentifier,
-            "device_name" : UIDevice.currentDevice().name
+            "device_name" : UIDevice.current.name
         ]
         
-        NSURLCache.sharedURLCache().removeAllCachedResponses()
+        URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
-            case let .Ok(json):
+            case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
                     try appNetworkState.saveClient(json)
                     completion(result)
                 } catch {
-                    completion(.Error(error))
+                    completion(.error(error))
                 }
-            case .Error:
+            case .error:
                 completion(result)
             }
         }
     }
     
-    public func refreshToken(completion: Network.ResponseCompletion) {
+    public func refreshToken(completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let refreshToken = appNetworkState.refreshToken else { return completion(.Error(Error.RefreshTokenMissing)) }
-        guard let url = NSURL(string: appNetworkState.tokenEndpointURLString) else {
-            let error = Network.Error.MalformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.Error(error))
+        guard let refreshToken = appNetworkState.refreshToken else { return completion(.error(AuthError.refreshTokenMissing)) }
+        guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
+            let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
+            completion(.error(error))
             return
         }
         var parameters = [
@@ -134,19 +134,19 @@ public struct AuthAPIRequests: AuthRequests {
             parameters["client_secret"] = client.secret
         }
         
-        NSURLCache.sharedURLCache().removeAllCachedResponses()
+        URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
         network.post(url, session: session, parameters: parameters) { result in
             switch result {
-            case let .Ok(json):
+            case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
                     completion(result)
                 } catch {
-                    completion(.Error(error))
+                    completion(.error(error))
                 }
-            case .Error:
+            case .error:
                 completion(result)
             }
         }
@@ -160,7 +160,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     public func logOut() {
         guard let appNetworkState = AppNetworkState.currentAppState else { return }
-        NSURLCache.sharedURLCache().removeAllCachedResponses()
+        URLCache.shared.removeAllCachedResponses()
         appNetworkState.deleteToken()
         appNetworkState.deleteClient()
     }
@@ -171,14 +171,14 @@ public struct AuthAPIRequests: AuthRequests {
 extension UIDevice {
 
     static var isSimulator: Bool {
-        return NSProcessInfo.processInfo().environment.keys.contains("SIMULATOR_DEVICE_NAME")
+        return ProcessInfo.processInfo.environment.keys.contains("SIMULATOR_DEVICE_NAME")
     }
 
     static var currentIdentifier: String {
         if isSimulator {
             return "5F21210D-3600-418E-BF37-ABA206DD0AFF"
         } else {
-            return UIDevice.currentDevice().identifierForVendor!.UUIDString
+            return UIDevice.current.identifierForVendor!.uuidString
         }
     }
 
