@@ -1,2 +1,2 @@
-github "utahiosmac/Marshal" == 0.9
-github "octanner/SimpleKeychain" == 0.1
+github "utahiosmac/Marshal" ~> 1.0
+github "octanner/SimpleKeychain" ~> 0.2

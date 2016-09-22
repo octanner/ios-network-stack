@@ -9,29 +9,29 @@
 import Foundation
 
 public enum Result<T> {
-    case Ok(T)
-    case Error(ErrorType)
+    case ok(T)
+    case error(Error)
     
-    public func map<U>(@noescape f: T throws -> U) -> Result<U> {
+    public func map<U>(_ f: (T) throws -> U) -> Result<U> {
         switch self {
-        case let .Ok(x):
+        case let .ok(x):
             do {
-                return try .Ok(f(x))
+                return try .ok(f(x))
             }
             catch {
-                return .Error(error)
+                return .error(error)
             }
-        case let .Error(error):
-            return .Error(error)
+        case let .error(error):
+            return .error(error)
         }
     }
     
-    public func flatMap<U>(@noescape f: T -> Result<U>) -> Result<U> {
+    public func flatMap<U>(_ f: (T) -> Result<U>) -> Result<U> {
         switch self {
-        case let .Ok(x):
+        case let .ok(x):
             return f(x)
-        case let .Error(error):
-            return .Error(error)
+        case let .error(error):
+            return .error(error)
         }
     }
 }

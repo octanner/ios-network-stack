@@ -9,58 +9,58 @@
 import Foundation
 import Marshal
 
-extension NSDate: ValueType {
+extension Date: ValueType {
     
-    public static func value(object: Any) throws -> NSDate {
+    public static func value(from object: Any) throws -> Date {
         // handle date strings
         if let dateString = object as? String {
-            guard let date = NSDate.fromISO8601String(dateString) else {
-                throw Marshal.Error.TypeMismatch(expected: "ISO8601 date string", actual: dateString)
+            guard let date = Date.fromISO8601(string: dateString) else {
+                throw MarshalError.typeMismatch(expected: "ISO8601 date string", actual: dateString)
             }
             return date
         }
             // handle NSDate objects
-        else if let date = object as? NSDate {
+        else if let date = object as? Date {
             return date
         }
         else {
-            throw Marshal.Error.TypeMismatch(expected: String.self, actual: object.dynamicType)
+            throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
         }
     }
 }
 
-public extension NSDate {
+public extension Date {
     
-    static private let ISO8601MillisecondFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
+    static fileprivate let ISO8601MillisecondFormatter: DateFormatter = {
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-        let tz = NSTimeZone(abbreviation:"GMT")
+        let tz = TimeZone(abbreviation:"GMT")
         formatter.timeZone = tz
         return formatter
     }()
     
-    static private let ISO8601SecondFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
+    static fileprivate let ISO8601SecondFormatter: DateFormatter = {
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        let tz = NSTimeZone(abbreviation:"GMT")
+        let tz = TimeZone(abbreviation:"GMT")
         formatter.timeZone = tz
         return formatter
     }()
     
-    static private let ISO8601YearMonthDayFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
+    static fileprivate let ISO8601YearMonthDayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
     
-    static private let formatters = [ISO8601MillisecondFormatter, ISO8601SecondFormatter, ISO8601YearMonthDayFormatter]
+    static fileprivate let formatters = [ISO8601MillisecondFormatter, ISO8601SecondFormatter, ISO8601YearMonthDayFormatter]
     
-    static func fromISO8601String(dateString:String) -> NSDate? {
+    static func fromISO8601(string: String) -> Date? {
         for formatter in formatters {
-            if let date = formatter.dateFromString(dateString) {
+            if let date = formatter.date(from: string) {
                 return date
             }
         }
-        return .None
+        return .none
     }
 }
