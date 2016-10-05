@@ -113,6 +113,15 @@ public struct Network {
         }
 
         
+        if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+            var body = ""
+            if let data = request.HTTPBody {
+                body = String(data: data, encoding: NSUTF8StringEncoding)!
+            }
+            let auth = session.configuration.HTTPAdditionalHeaders?["Authorization"]
+            let command = "\(NSDate()): curl -H 'Authorization: \(auth)' -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            print(command)
+        }
         let task = session.dataTask(with: request, completionHandler: { data, response, error in
             if let error = error as? NSError, error.code == NSURLErrorTimedOut {
                 self.finalizeNetworkCall(result: .error(NetworkError.timeout), completion: completion)
