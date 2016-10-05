@@ -115,6 +115,15 @@ private extension Network {
             return
         }
         
+        if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+            var body = ""
+            if let data = request.HTTPBody {
+                body = String(data: data, encoding: NSUTF8StringEncoding)!
+            }
+            let auth = session.configuration.HTTPAdditionalHeaders?["Authorization"]
+            let command = "\(NSDate()): curl -H 'Authorization: \(auth)' -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            print(command)
+        }
         let task = session.dataTaskWithRequest(request) { data, response, error in
             if let error = error where error.code == NSURLErrorTimedOut {
                 self.finalizeNetworkCall(result: .Error(Error.Timeout), completion: completion)
