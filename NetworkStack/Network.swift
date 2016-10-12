@@ -152,6 +152,11 @@ private extension Network {
                 
                 
             } else {
+                if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+                    if let data = data {
+                        print(String(data: data, encoding: NSUTF8StringEncoding))
+                    }
+                }
                 let networkError = Error.Status(status: response.statusCode)
                 self.finalizeNetworkCall(result: .Error(networkError), completion: completion)
             }
