@@ -150,6 +150,11 @@ public struct Network {
                 
                 
             } else {
+                if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+                    if let data = data {
+                        print(String(data: data, encoding: NSUTF8StringEncoding))
+                    }
+                }
                 let networkError = NetworkError.status(status: response.statusCode)
                 self.finalizeNetworkCall(result: .error(networkError), completion: completion)
             }
