@@ -25,7 +25,7 @@ public struct Network {
         case ResponseNotValidHTTP
         
         /// HTTP Error status code
-        case Status(status: Int)
+        case Status(status: Int, message: JSONObject?)
         
         /// Response came back with no data
         case NoData
@@ -39,7 +39,13 @@ public struct Network {
                 return "Attempted to request a malformed API endpoint: \(endpoint)"
             case .ResponseNotValidHTTP:
                 return "Response was not an HTTP Response."
-            case .Status(let status):
+            case .Status(let status, let message):
+                if let message = message {
+                    let statusMessage: String? = try? message.valueForKey("statusText")
+                    if let statusMessage = statusMessage {
+                        return "\(status) \(statusMessage)"
+                    }
+                }
                 let errorMessage = NSHTTPURLResponse.localizedStringForStatusCode(status)
                 return "\(status) \(errorMessage)"
             case .NoData:
@@ -161,7 +167,11 @@ private extension Network {
                         print(String(data: data, encoding: NSUTF8StringEncoding))
                     }
                 }
-                let networkError = Error.Status(status: response.statusCode)
+                var message: JSONObject? = nil
+                if let data = data where data.length > 0 {
+                    message = try? JSONParser.JSONObjectGuaranteed(data)
+                }
+                let networkError = Error.Status(status: response.statusCode, message: message)
                 self.finalizeNetworkCall(result: .Error(networkError), completion: completion)
             }
         }

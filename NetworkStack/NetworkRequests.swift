@@ -110,7 +110,7 @@ private extension NetworkAPIRequests {
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     func config(endpoint: String) throws -> (session: NSURLSession, url: NSURL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let session = activeSession else { throw Network.Error.Status(status: 401) }
+        guard let session = activeSession else { throw Network.Error.Status(status: 401, message: [ "statusMessage": "Networking stack is misconfigured. Restart the app."]) }
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw Network.Error.MalformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
