@@ -12,29 +12,35 @@ import Marshal
 // MARK: - Error
 
 public enum NetworkError: Error, CustomStringConvertible {
-    
+
     /// Attempted to request a malformed API endpoint
     case malformedEndpoint(endpoint: String)
-    
+
     /// Recieved an invalid response from the server.
     case responseNotValidHTTP
-    
+
     /// HTTP Error status code
-    case status(status: Int)
-    
+    case status(status: Int, message: JSONObject?)
+
     /// Response came back with no data
     case noData
-    
+
     /// Response timed out
     case timeout
-    
+
     public var description: String {
         switch self {
         case .malformedEndpoint(let endpoint):
             return "Attempted to request a malformed API endpoint: \(endpoint)"
         case .responseNotValidHTTP:
             return "Response was not an HTTP Response."
-        case .status(let status):
+        case .status(let status, let message):
+            if let message = message {
+                let statusMessage: String? = try? message.valueForKey("statusText")
+                if let statusMessage = statusMessage {
+                    return "\(status) \(statusMessage)"
+                }
+            }
             let errorMessage = HTTPURLResponse.localizedString(forStatusCode: status)
             return "\(status) \(errorMessage)"
         case .noData:
@@ -43,17 +49,17 @@ public enum NetworkError: Error, CustomStringConvertible {
             return "Response timed out"
         }
     }
-    
+
 }
 
 
 public struct Network {
-    
+
     public typealias ResponseCompletion = (Result<JSONObject>) -> Void
-    
-    
+
+
     // MARK: - Enums
-    
+
     enum RequestType: String {
         case get
         case post
@@ -61,15 +67,15 @@ public struct Network {
         case put
         case delete
     }
-    
-    
+
+
     // MARK: - Initializers
-    
+
     public init() { }
-    
-    
+
+
     // MARK: - Public API
-    
+
     public func get(from url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         let _url: URL
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
@@ -81,11 +87,11 @@ public struct Network {
         }
         perform(action: .get, at: _url, using: session, with: nil, completion: completion)
     }
-    
+
     public func post(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         perform(action: .post, at: url, using: session, with: parameters, completion: completion)
     }
-    
+
     public func patch(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         perform(action: .patch, at: url, using: session, with: parameters, completion: completion)
     }
@@ -98,9 +104,9 @@ public struct Network {
         perform(action: .delete, at: url, using: session, with: nil, completion: completion)
     }
 
-    
+
     // MARK: - Private functions
-    
+
     private func perform(action requestType: RequestType, at url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         var request = URLRequest(url: url)
         request.httpMethod = requestType.rawValue
@@ -112,7 +118,7 @@ public struct Network {
             return
         }
 
-        
+
         if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
             var body = ""
             if let data = request.HTTPBody {
@@ -151,27 +157,31 @@ public struct Network {
                 catch {
                     self.finalizeNetworkCall(result: .error(error), completion: completion)
                 }
-                
-                
+
+
             } else {
                 if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
                     if let data = data {
                         print(String(data: data, encoding: NSUTF8StringEncoding))
                     }
                 }
-                let networkError = NetworkError.status(status: response.statusCode)
+                var message: JSONObject? = nil
+                if let data = data where data.length > 0 {
+                    message = try? JSONParser.JSONObjectGuaranteed(data)
+                }
+                let networkError = NetworkError.status(status: response.statusCode, message: message)
                 self.finalizeNetworkCall(result: .error(networkError), completion: completion)
             }
-        }) 
+        })
         task.resume()
     }
-    
+
     func finalizeNetworkCall(result: Result<JSONObject>, completion: @escaping Network.ResponseCompletion) {
         DispatchQueue.main.async {
             completion(result)
         }
     }
-    
+
     func queryItems(_ parameters: JSONObject?) -> [URLQueryItem]? {
         if let parameters = parameters {
             var queryItems = [URLQueryItem]()
@@ -183,12 +193,12 @@ public struct Network {
         }
         return nil
     }
-    
+
 }
 
 
 private extension JSONParser {
-    
+
     static func JSONObjectGuaranteed(with data: Data) throws -> JSONObject {
         let obj: Any = try JSONSerialization.jsonObject(with: data, options: [])
         if let array = obj as? [JSONObject] {
@@ -197,5 +207,5 @@ private extension JSONParser {
             return try JSONObject.value(from: obj)
         }
     }
-    
+
 }
