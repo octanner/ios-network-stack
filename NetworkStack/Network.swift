@@ -120,8 +120,12 @@ private extension Network {
             if let data = request.HTTPBody {
                 body = String(data: data, encoding: NSUTF8StringEncoding)!
             }
-            let auth = session.configuration.HTTPAdditionalHeaders?["Authorization"]
-            let command = "\(NSDate()): curl -H 'Authorization: \(auth)' -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            var command = ""
+            if let headers = session.configuration.HTTPAdditionalHeaders, auth = headers["Authorization"] {
+                command = "\(NSDate()): curl -H 'Authorization: \(auth)' -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            } else {
+                command = "\(NSDate()): curl -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            }
             print(command)
         }
         let task = session.dataTaskWithRequest(request) { data, response, error in
