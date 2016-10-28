@@ -118,7 +118,15 @@ public struct Network {
             return
         }
 
-
+        switch requestType {
+        case .post, .put, .patch:
+            var headers = request.allHTTPHeaderFields ?? [:]
+            headers["Content-Type"] = "application/json"
+            request.allHTTPHeaderFields = headers
+        case .get, .delete:
+            break
+        }
+        
         if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
             var body = ""
             if let data = request.HTTPBody {

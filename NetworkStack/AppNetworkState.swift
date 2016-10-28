@@ -51,9 +51,16 @@ public struct AppNetworkState {
     public let apiURLString: String
     public let tokenEndpointURLString: String
     public let environmentKey: String
+    public let appSlug: String
     public static var loggedIn: Bool {
         guard let currentAppState = currentAppState else { return false }
         return currentAppState.accessToken != nil
+    }
+    public static var defaultAppVersionSlug: String {
+        return NSBundle.mainBundle().identifierBuildVersion
+    }
+    public var appVersionSlug: String {
+        return "\(appSlug)-\(NSBundle.mainBundle().buildVersion)"
     }
     public var accessToken: String? {
         do {
@@ -91,25 +98,30 @@ public struct AppNetworkState {
     private static let apiURLStringKey = "NetworkStack.apiURLString"
     private static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
     private static let environmentKeyKey = "NetworkStack.environmentKey"
+    private static let languageKey = "NetworkStack.languageKey"
+    private static let appSlugKey = "NetworkStack.appSlugKey"
     private static let appNetworkStateKey = "NetworkStack.appNetworkState"
     
 
     // MARK: - Initializers
 
-    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String) {
+    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, appSlug: String? = nil) {
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
+        self.appSlug = appSlug ?? NSBundle.mainBundle().identifier
     }
     
     init(dictionary: [String: AnyObject]) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
+		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? NSBundle.mainBundle().identifier
         
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
+        self.appSlug = appSlug
     }
     
     
