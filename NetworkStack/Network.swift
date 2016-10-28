@@ -120,6 +120,15 @@ private extension Network {
             completion(.Error(error))
             return
         }
+
+        switch requestType {
+        case .POST, .PUT, .PATCH:
+            var headers = request.allHTTPHeaderFields ?? [:]
+            headers["Content-Type"] = "application/json"
+            request.allHTTPHeaderFields = headers
+        case .GET, .DELETE:
+            break
+        }
         
         if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
             var body = ""

@@ -36,8 +36,20 @@ public struct AuthAPIRequests: AuthRequests {
     var network = Network()
     
     private var defaultSession: NSURLSession {
+        var appVersionSlug = AppNetworkState.defaultAppVersionSlug
+        if let appNetworkState = AppNetworkState.currentAppState {
+            appVersionSlug = appNetworkState.appVersionSlug
+        }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json"]
+
+        var headers: [NSObject:AnyObject] = [
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Request-ID": NSUUID().UUIDString,
+            "Accept-Language": NSBundle.mainBundle().acceptLanguages,
+            "X-Client-Id": appVersionSlug
+        ]
+
         configuration.timeoutIntervalForRequest = 10.0
         return NSURLSession(configuration: configuration)
     }

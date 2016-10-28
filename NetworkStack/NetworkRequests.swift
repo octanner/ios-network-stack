@@ -35,7 +35,16 @@ public struct NetworkAPIRequests: NetworkRequests {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = appNetworkState.accessToken else { return nil }
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = ["content-type": "application/json", "Authorization": "Bearer \(accessToken)"]
+
+        var headers: [NSObject:AnyObject] = [
+            "Accept": "application/json",
+            "Authorization": "Bearer \(accessToken)",
+            "X-Request-ID": NSUUID().UUIDString,
+            "Accept-Language": NSBundle.mainBundle().acceptLanguages,
+            "X-Client-Id": appNetworkState.appVersionSlug
+        ]
+
+        configuration.HTTPAdditionalHeaders = headers
         configuration.timeoutIntervalForRequest = 10.0
         return NSURLSession(configuration: configuration)
     }
