@@ -12,9 +12,11 @@ import Foundation
 extension NSBundle {
 
     var acceptLanguages: String {
-        return preferredLocalizations.enumerate().map { index, language in
-            return index == 0 ? language : "\(language);q=\(1.0 - Float(index)/10.0)"
-        }.joinWithSeparator(", ")
+        return NSLocale.preferredLanguages().enumerate().map { index, locale in
+            let language = locale.componentsSeparatedByString("-").first!
+            let priority = 1.0 - Float(index)/10.0
+            return "\(locale);q=\(priority),\(language);q=\(priority - 0.05)"
+        }.joinWithSeparator(",")
     }
 
     var identifier: String {

@@ -129,14 +129,19 @@ public struct Network {
         
         if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
             var body = ""
-            if let data = request.HTTPBody {
-                body = String(data: data, encoding: NSUTF8StringEncoding)!
+            if let data = request.HTTPBody where request.HTTPMethod != "GET" && request.HTTPMethod != "DELETE" {
+                body = " -d '\(String(data: data, encoding: NSUTF8StringEncoding)!)'"
             }
             var command = ""
-            if let headers = session.configuration.HTTPAdditionalHeaders, auth = headers["Authorization"] {
-                command = "\(NSDate()): curl -H 'Authorization: \(auth)' -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+            var headerValues = [String]()
+            if let requestHeaders = request.allHTTPHeaderFields {
+                headerValues.appendContentsOf(requestHeaders.map { name, value in "-H '\(name): \(value)'" })
+            }
+            if let headers = session.configuration.HTTPAdditionalHeaders {
+                headerValues.appendContentsOf(headers.map { name, value in "-H '\(name): \(value)'" })
+                command = "\(NSDate()): curl \(headerValues.joinWithSeparator(" ")) -X \(requestType.rawValue)\(body) \(request.URL!)"
             } else {
-                command = "\(NSDate()): curl -H 'Content-Type: application/json' -X \(requestType.rawValue) -d '\(body)' \(request.URL!)"
+                command = "\(NSDate()): curl \(headerValues.joinWithSeparator(" ")) -X \(requestType.rawValue)\(body) \(request.URL!)"
             }
             print(command)
         }
@@ -156,6 +161,9 @@ public struct Network {
                 }
                 do {
                     if data.count > 0 {
+						if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+                            dump(String(data: data, encoding: NSUTF8StringEncoding))
+                        }
                         let responseObject = try JSONParser.JSONObjectGuaranteed(with: data)
                         self.finalizeNetworkCall(result: .ok(responseObject), completion: completion)
                     } else {
