@@ -57,10 +57,10 @@ public struct AppNetworkState {
         return currentAppState.accessToken != nil
     }
     public static var defaultAppVersionSlug: String {
-        return NSBundle.mainBundle().identifierBuildVersion
+        return Bundle.main.identifierBuildVersion
     }
     public var appVersionSlug: String {
-        return "\(appSlug)-\(NSBundle.mainBundle().buildVersion)"
+        return "\(appSlug)-\(Bundle.main.buildVersion)"
     }
     public var accessToken: String? {
         do {
@@ -109,14 +109,14 @@ public struct AppNetworkState {
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
-        self.appSlug = appSlug ?? NSBundle.mainBundle().identifier
+        self.appSlug = appSlug ?? Bundle.main.identifier
     }
     
     init(dictionary: [String: AnyObject]) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
-		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? NSBundle.mainBundle().identifier
+		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
         
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString

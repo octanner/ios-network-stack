@@ -36,7 +36,7 @@ public enum NetworkError: Error, CustomStringConvertible {
             return "Response was not an HTTP Response."
         case .status(let status, let message):
             if let message = message {
-                let statusMessage: String? = try? message.valueForKey("statusText")
+                let statusMessage: String? = try? message.value(for: "statusText")
                 if let statusMessage = statusMessage {
                     return "\(status) \(statusMessage)"
                 }
@@ -127,21 +127,21 @@ public struct Network {
             break
         }
         
-        if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+        if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
             var body = ""
-            if let data = request.HTTPBody where request.HTTPMethod != "GET" && request.HTTPMethod != "DELETE" {
-                body = " -d '\(String(data: data, encoding: NSUTF8StringEncoding)!)'"
+            if let data = request.httpBody, request.httpMethod != "GET" && request.httpMethod != "DELETE" {
+                body = " -d '\(String(data: data, encoding: .utf8)!)'"
             }
             var command = ""
             var headerValues = [String]()
             if let requestHeaders = request.allHTTPHeaderFields {
-                headerValues.appendContentsOf(requestHeaders.map { name, value in "-H '\(name): \(value)'" })
+                headerValues.append(contentsOf: requestHeaders.map { name, value in "-H '\(name): \(value)'" })
             }
-            if let headers = session.configuration.HTTPAdditionalHeaders {
-                headerValues.appendContentsOf(headers.map { name, value in "-H '\(name): \(value)'" })
-                command = "\(NSDate()): curl \(headerValues.joinWithSeparator(" ")) -X \(requestType.rawValue)\(body) \(request.URL!)"
+            if let headers = session.configuration.httpAdditionalHeaders {
+                headerValues.append(contentsOf: headers.map { name, value in "-H '\(name): \(value)'" })
+                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue)\(body) \(request.url!)"
             } else {
-                command = "\(NSDate()): curl \(headerValues.joinWithSeparator(" ")) -X \(requestType.rawValue)\(body) \(request.URL!)"
+                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue)\(body) \(request.url!)"
             }
             print(command)
         }
@@ -161,8 +161,8 @@ public struct Network {
                 }
                 do {
                     if data.count > 0 {
-						if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
-                            dump(String(data: data, encoding: NSUTF8StringEncoding))
+						if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
+                            dump(String(data: data, encoding: .utf8))
                         }
                         let responseObject = try JSONParser.JSONObjectGuaranteed(with: data)
                         self.finalizeNetworkCall(result: .ok(responseObject), completion: completion)
@@ -176,14 +176,14 @@ public struct Network {
 
 
             } else {
-                if NSProcessInfo.processInfo().environment["networkDebug"] == "YES" {
+                if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
                     if let data = data {
-                        print(String(data: data, encoding: NSUTF8StringEncoding))
+                        print(String(data: data, encoding: .utf8) ?? "<no data>")
                     }
                 }
                 var message: JSONObject? = nil
-                if let data = data where data.length > 0 {
-                    message = try? JSONParser.JSONObjectGuaranteed(data)
+                if let data = data, data.count > 0 {
+                    message = try? JSONParser.JSONObjectGuaranteed(with: data)
                 }
                 let networkError = NetworkError.status(status: response.statusCode, message: message)
                 self.finalizeNetworkCall(result: .error(networkError), completion: completion)

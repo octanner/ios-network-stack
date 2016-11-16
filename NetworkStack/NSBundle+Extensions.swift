@@ -9,14 +9,14 @@
 import Foundation
 
 
-extension NSBundle {
+extension Bundle {
 
     var acceptLanguages: String {
-        return NSLocale.preferredLanguages().enumerate().map { index, locale in
-            let language = locale.componentsSeparatedByString("-").first!
+        return Locale.preferredLanguages.enumerated().map { index, locale in
+            let language = locale.components(separatedBy: "-").first!
             let priority = 1.0 - Float(index)/10.0
             return "\(locale);q=\(priority),\(language);q=\(priority - 0.05)"
-        }.joinWithSeparator(",")
+            }.joined(separator: ",")
     }
 
     var identifier: String {

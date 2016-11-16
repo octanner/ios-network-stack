@@ -50,13 +50,13 @@ public struct AuthAPIRequests: AuthRequests {
         if let appNetworkState = AppNetworkState.currentAppState {
             appVersionSlug = appNetworkState.appVersionSlug
         }
-        let configuration = URLSessionConfiguration.defaultSessionConfiguration()
+        let configuration = URLSessionConfiguration.default
 
-        var headers: [NSObject:AnyObject] = [
+        let headers: [String:String] = [
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "X-Request-ID": NSUUID().UUIDString,
-            "Accept-Language": NSBundle.mainBundle().acceptLanguages,
+            "X-Request-ID": NSUUID().uuidString,
+            "Accept-Language": Bundle.main.acceptLanguages,
             "X-Client-Id": appVersionSlug
         ]
 		configuration.httpAdditionalHeaders = headers
