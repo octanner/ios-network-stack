@@ -79,7 +79,7 @@ public struct AuthAPIRequests: AuthRequests {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.error(error))
+            completion(.error(error), nil)
             return
         }
         let parameters = [
@@ -91,17 +91,17 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
 
         let session = activeSession
-        network.post(to: url, using: session, with: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result, headers in
             switch result {
             case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
-                    completion(result)
+                    completion(result, headers)
                 } catch {
-                    completion(.error(error))
+                    completion(.error(error), headers)
                 }
             case .error:
-                completion(result)
+                completion(result, headers)
             }
         }
     }
@@ -111,7 +111,7 @@ public struct AuthAPIRequests: AuthRequests {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.error(error))
+            completion(.error(error), nil)
             return
         }
         let parameters = [
@@ -124,28 +124,28 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
-        network.post(to: url, using: session, with: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result, headers in
             switch result {
             case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
                     try appNetworkState.saveClient(json)
-                    completion(result)
+                    completion(result, headers)
                 } catch {
-                    completion(.error(error))
+                    completion(.error(error), headers)
                 }
             case .error:
-                completion(result)
+                completion(result, headers)
             }
         }
     }
     
     public func refreshToken(completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let refreshToken = appNetworkState.refreshToken else { return completion(.error(AuthError.refreshTokenMissing)) }
+        guard let refreshToken = appNetworkState.refreshToken else { return completion(.error(AuthError.refreshTokenMissing), nil) }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
-            completion(.error(error))
+            completion(.error(error), nil)
             return
         }
         var parameters = [
@@ -160,17 +160,17 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
         
         let session = activeSession
-        network.post(to: url, using: session, with: parameters) { result in
+        network.post(to: url, using: session, with: parameters) { result, headers in
             switch result {
             case let .ok(json):
                 do {
                     try appNetworkState.saveToken(json)
-                    completion(result)
+                    completion(result, headers)
                 } catch {
-                    completion(.error(error))
+                    completion(.error(error), headers)
                 }
             case .error:
-                completion(result)
+                completion(result, headers)
             }
         }
     }

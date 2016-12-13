@@ -55,7 +55,7 @@ public enum NetworkError: Error, CustomStringConvertible {
 
 public struct Network {
 
-    public typealias ResponseCompletion = (Result<JSONObject>) -> Void
+    public typealias ResponseCompletion = (Result<JSONObject>, JSONObject?) -> Void
 
 
     // MARK: - Enums
@@ -114,7 +114,7 @@ public struct Network {
             request.httpBody = try parameters?.jsonData()
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } catch {
-            completion(.error(error))
+            completion(.error(error), request.allHTTPHeaderFields)
             return
         }
 
@@ -147,16 +147,21 @@ public struct Network {
         }
         let task = session.dataTask(with: request, completionHandler: { data, response, error in
             if let error = error as? NSError, error.code == NSURLErrorTimedOut {
-                self.finalizeNetworkCall(result: .error(NetworkError.timeout), completion: completion)
+                self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
                 return
             }
             guard let response = response as? HTTPURLResponse else {
-                self.finalizeNetworkCall(result: .error(NetworkError.responseNotValidHTTP), completion: completion)
+                self.finalizeNetworkCall(result: .error(NetworkError.responseNotValidHTTP), headers: nil, completion: completion)
                 return
+            }
+            let headers = response.allHeaderFields.reduce([String:String]()) { result, pair in
+                var dictionary = result
+                dictionary[pair.key.description.lowercased()] = "\(pair.value)"
+                return dictionary
             }
             if case let status = response.statusCode , status >= 200 && status < 300 {
                 guard let data = data else {
-                    self.finalizeNetworkCall(result: .error(NetworkError.noData), completion: completion)
+                    self.finalizeNetworkCall(result: .error(NetworkError.noData), headers: headers, completion: completion)
                     return
                 }
                 do {
@@ -165,13 +170,13 @@ public struct Network {
                             dump(String(data: data, encoding: .utf8))
                         }
                         let responseObject = try JSONParser.JSONObjectGuaranteed(with: data)
-                        self.finalizeNetworkCall(result: .ok(responseObject), completion: completion)
+                        self.finalizeNetworkCall(result: .ok(responseObject), headers: headers, completion: completion)
                     } else {
-                        self.finalizeNetworkCall(result: .ok(JSONObject()), completion: completion)
+                        self.finalizeNetworkCall(result: .ok(JSONObject()), headers: headers, completion: completion)
                     }
                 }
                 catch {
-                    self.finalizeNetworkCall(result: .error(error), completion: completion)
+                    self.finalizeNetworkCall(result: .error(error), headers: headers, completion: completion)
                 }
 
 
@@ -186,15 +191,15 @@ public struct Network {
                     message = try? JSONParser.JSONObjectGuaranteed(with: data)
                 }
                 let networkError = NetworkError.status(status: response.statusCode, message: message)
-                self.finalizeNetworkCall(result: .error(networkError), completion: completion)
+                self.finalizeNetworkCall(result: .error(networkError), headers: headers, completion: completion)
             }
         })
         task.resume()
     }
 
-    func finalizeNetworkCall(result: Result<JSONObject>, completion: @escaping Network.ResponseCompletion) {
+    func finalizeNetworkCall(result: Result<JSONObject>, headers: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         DispatchQueue.main.async {
-            completion(result)
+            completion(result, headers)
         }
     }
 

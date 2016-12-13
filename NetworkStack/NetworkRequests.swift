@@ -61,7 +61,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             network.get(from: url, using: session, with: parameters, completion: completion)
         }
         catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
     
@@ -71,7 +71,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             network.post(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
     
@@ -81,7 +81,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             network.patch(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
     
@@ -91,7 +91,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             network.put(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
     
@@ -102,7 +102,7 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
             
         catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
     
