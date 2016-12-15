@@ -130,7 +130,7 @@ public struct Network {
         if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
             var body = ""
             if let data = request.httpBody, request.httpMethod != "GET" && request.httpMethod != "DELETE" {
-                body = " -d '\(String(data: data, encoding: .utf8)!.uppercased())'"
+                body = " -d '\(String(data: data, encoding: .utf8)!)'"
             }
             var command = ""
             var headerValues = [String]()
@@ -139,9 +139,9 @@ public struct Network {
             }
             if let headers = session.configuration.httpAdditionalHeaders {
                 headerValues.append(contentsOf: headers.map { name, value in "-H '\(name): \(value)'" })
-                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue)\(body) \(request.url!)"
+                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue.uppercased())\(body) \(request.url!)"
             } else {
-                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue)\(body) \(request.url!)"
+                command = "\(NSDate()): curl \(headerValues.joined(separator: " ")) -X \(requestType.rawValue.uppercased())\(body) \(request.url!)"
             }
             print(command)
         }
