@@ -224,8 +224,10 @@ private extension JSONParser {
         let obj: Any = try JSONSerialization.jsonObject(with: data, options: [])
         if let array = obj as? [JSONObject] {
             return [ "data": array ]
+        } else if let objectValue = obj as? JSONObject {
+            return objectValue
         } else {
-            return try JSONObject.value(from: obj)
+            throw MarshalError.typeMismatch(expected: JSONObject.self, actual: type(of: obj))
         }
     }
 
