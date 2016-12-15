@@ -130,7 +130,7 @@ public struct Network {
         if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
             var body = ""
             if let data = request.httpBody, request.httpMethod != "GET" && request.httpMethod != "DELETE" {
-                body = " -d '\(String(data: data, encoding: .utf8)!)'"
+                body = " -d '\(String(data: data, encoding: .utf8)!.uppercased())'"
             }
             var command = ""
             var headerValues = [String]()
