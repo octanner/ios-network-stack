@@ -153,7 +153,7 @@ public struct Network {
         }
         let start = Date()
         let task = session.dataTask(with: request, completionHandler: { data, response, error in
-            let duration = Int(round(-start.timeIntervalSinceNow * 100))
+            let duration = Int(round(-start.timeIntervalSinceNow * 1000))
             var line = "at=Network.swift method=\(request.httpMethod!) path=\(request.url!.path) host=\(request.url!.host!) request_id=\(request.allHTTPHeaderFields?["X-Request-ID"] ?? "not-found")"
             if duration <= 250 {
                 line += " service=\(duration)ms"
