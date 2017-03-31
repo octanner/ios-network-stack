@@ -55,7 +55,6 @@ public struct AuthAPIRequests: AuthRequests {
         let headers: [String:String] = [
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "X-Request-ID": NSUUID().uuidString,
             "Accept-Language": Bundle.main.acceptLanguages,
             "X-Client-Id": appVersionSlug
         ]

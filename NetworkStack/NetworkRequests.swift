@@ -31,7 +31,6 @@ public struct NetworkAPIRequests: NetworkRequests {
         let headers: [String:String] = [
             "Accept": "application/json",
             "Authorization": "Bearer \(accessToken)",
-            "X-Request-ID": NSUUID().uuidString,
             "Accept-Language": Bundle.main.acceptLanguages,
             "X-Client-Id": appNetworkState.appVersionSlug
         ]

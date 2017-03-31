@@ -8,8 +8,12 @@
 
 import Foundation
 import Marshal
+import SwiftyBeaver
+
 
 // MARK: - Error
+
+fileprivate let log = SwiftyBeaver.self
 
 public enum NetworkError: Error, CustomStringConvertible {
 
@@ -118,15 +122,17 @@ public struct Network {
             return
         }
 
+        var headers = request.allHTTPHeaderFields ?? [:]
+        var requestId = UUID().uuidString
+        headers["X-Request-ID"] = requestId
         switch requestType {
         case .post, .put, .patch:
-            var headers = request.allHTTPHeaderFields ?? [:]
             headers["Content-Type"] = "application/json"
-            request.allHTTPHeaderFields = headers
         case .get, .delete:
             break
         }
-        
+        request.allHTTPHeaderFields = headers
+
         if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
             var body = ""
             if let data = request.httpBody, request.httpMethod != "GET" && request.httpMethod != "DELETE" {
@@ -145,12 +151,26 @@ public struct Network {
             }
             print(command)
         }
+        let start = Date()
         let task = session.dataTask(with: request, completionHandler: { data, response, error in
+            let duration = Int(round(-start.timeIntervalSinceNow * 100))
+            var line = "at=Network.swift method=\(request.httpMethod!) path=\(request.url!.path) host=\(request.url!.host!) request_id=\(request.allHTTPHeaderFields?["X-Request-ID"] ?? "not-found")"
+            if duration <= 250 {
+                line += " service=\(duration)ms"
+            } else if duration <= 500 {
+                line += " \u{001b}[35mservice=\(duration)ms\u{001b}[0m"
+            } else {
+                line += " \u{001b}[31mservice=\(duration)ms\u{001b}[0m"
+            }
             if let error = error as? NSError, error.code == NSURLErrorTimedOut {
+                line += " \u{001b}[31mstatus=timed-out\u{001b}[0m"
+                log.error(line)
                 self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
                 return
             }
             guard let response = response as? HTTPURLResponse else {
+                line += " \u{001b}[31mstatus=not-valid-http\u{001b}[0m"
+                log.error(line)
                 self.finalizeNetworkCall(result: .error(NetworkError.responseNotValidHTTP), headers: nil, completion: completion)
                 return
             }
@@ -159,11 +179,17 @@ public struct Network {
                 dictionary[pair.key.description.lowercased()] = "\(pair.value)"
                 return dictionary
             }
-            if case let status = response.statusCode , status >= 200 && status < 300 {
+            let status = response.statusCode
+            if status >= 200 && status < 300 {
+                line += " status=\(status)"
                 guard let data = data else {
+                    line += "\u{001b}[31mbytes=0\u{001b}[0m"
+                    log.error(line)
                     self.finalizeNetworkCall(result: .error(NetworkError.noData), headers: headers, completion: completion)
                     return
                 }
+                line += " bytes=\(data.count)"
+                log.info(line)
                 do {
                     if data.count > 0 {
 						if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
@@ -181,11 +207,14 @@ public struct Network {
 
 
             } else {
-                if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
-                    if let data = data {
+                line += " status=\u{001b}[31m\(status)\u{001b}[0m"
+                if let data = data {
+                    line += " bytes=\(data.count)"
+                    if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
                         print(String(data: data, encoding: .utf8) ?? "<no data>")
                     }
                 }
+                log.error(line)
                 var message: JSONObject? = nil
                 if let data = data, data.count > 0 {
                     message = try? JSONParser.JSONObjectGuaranteed(with: data)

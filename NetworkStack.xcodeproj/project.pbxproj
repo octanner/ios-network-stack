@@ -18,6 +18,7 @@
 		AFBED1E61C7CDA3B00622331 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBED1E51C7CDA3B00622331 /* Result.swift */; };
 		AFBED2781C7E651900622331 /* Marshal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFBED2771C7E651900622331 /* Marshal.framework */; };
 		AFBED27A1C7E68E600622331 /* NSDate+ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */; };
+		B0015F2C1E8E04DB004F7FF2 /* SwiftyBeaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0015F2B1E8E04DB004F7FF2 /* SwiftyBeaver.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B011A61A1DC3CB9F00EC8FDA /* NSBundle+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B011A6191DC3CB9F00EC8FDA /* NSBundle+Extensions.swift */; };
 		B06646A41C7E4707000CCBC5 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */; };
 		B0983BA71C6FC61F0060F2DE /* AppNetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */; };
@@ -48,6 +49,7 @@
 		AFBED1E51C7CDA3B00622331 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		AFBED2771C7E651900622331 /* Marshal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Marshal.framework; path = "Carthage/Checkouts/Marshal/build/Debug-iphoneos/Marshal.framework"; sourceTree = "<group>"; };
 		AFBED2791C7E68E600622331 /* NSDate+ValueType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+ValueType.swift"; sourceTree = "<group>"; };
+		B0015F2B1E8E04DB004F7FF2 /* SwiftyBeaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyBeaver.framework; path = "../SwiftyBeaver/build/Debug-iphoneos/SwiftyBeaver.framework"; sourceTree = "<group>"; };
 		B011A6191DC3CB9F00EC8FDA /* NSBundle+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSBundle+Extensions.swift"; sourceTree = "<group>"; };
 		B06646A31C7E4707000CCBC5 /* OAuth2Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuth2Client.swift; sourceTree = "<group>"; };
 		B0983BA61C6FC61F0060F2DE /* AppNetworkState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNetworkState.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0015F2C1E8E04DB004F7FF2 /* SwiftyBeaver.framework in Frameworks */,
 				AFBED2781C7E651900622331 /* Marshal.framework in Frameworks */,
 				701762A01C6D1230008D42C6 /* SimpleKeychain.framework in Frameworks */,
 			);
@@ -80,6 +83,7 @@
 				701762851C6D117D008D42C6 /* NetworkStack */,
 				701762911C6D117D008D42C6 /* NetworkStackTests */,
 				701762841C6D117D008D42C6 /* Products */,
+				B0015F2A1E8E04DA004F7FF2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -128,6 +132,14 @@
 			);
 			name = Frameworks;
 			path = ..;
+			sourceTree = "<group>";
+		};
+		B0015F2A1E8E04DA004F7FF2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B0015F2B1E8E04DB004F7FF2 /* SwiftyBeaver.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

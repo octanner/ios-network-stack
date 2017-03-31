@@ -1,2 +1,3 @@
-github "utahiosmac/Marshal" "v1.0"
+github "SwiftyBeaver/SwiftyBeaver" "1.1.4"
 github "octanner/SimpleKeychain" "v0.2"
+github "utahiosmac/Marshal" "v1.0"
