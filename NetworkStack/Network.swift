@@ -15,7 +15,7 @@ import SwiftyBeaver
 
 fileprivate let log = SwiftyBeaver.self
 
-public enum NetworkError: Error, CustomStringConvertible {
+public enum NetworkError: LocalizedError {
 
     /// Attempted to request a malformed API endpoint
     case malformedEndpoint(endpoint: String)
@@ -32,7 +32,7 @@ public enum NetworkError: Error, CustomStringConvertible {
     /// Response timed out
     case timeout
 
-    public var description: String {
+    public var errorDescription: String? {
         switch self {
         case .malformedEndpoint(let endpoint):
             return "Attempted to request a malformed API endpoint: \(endpoint)"
