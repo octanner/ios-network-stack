@@ -8,6 +8,7 @@
 
 import Foundation
 import Marshal
+import SimpleKeychain
 
 
 public struct AppNetworkState {
@@ -26,7 +27,7 @@ public struct AppNetworkState {
             if let currentState = savedCurrentAppState {
                 return currentState
             }
-            if let dictionary = UserDefaults.standard.object(forKey: AppNetworkState.appNetworkStateKey) as? [String: AnyObject] {
+            if let dictionary = UserDefaults.standard.object(forKey: AppNetworkState.appNetworkStateKey) as? [String: Any] {
                 do {
                     let state = try AppNetworkState(dictionary: dictionary)
                     savedCurrentAppState = state
@@ -52,6 +53,7 @@ public struct AppNetworkState {
     public let tokenEndpointURLString: String
     public let environmentKey: String
     public let appSlug: String
+    public let keychain: Keychain
     public static var loggedIn: Bool {
         guard let currentAppState = currentAppState else { return false }
         return currentAppState.accessToken != nil
@@ -64,7 +66,7 @@ public struct AppNetworkState {
     }
     public var accessToken: String? {
         do {
-            let token = try OAuth2Token(key: environmentKey)
+            let token = try OAuth2Token(key: environmentKey, keychain: keychain)
             if Date().compare(token.expiresAt) == .orderedAscending {
                 return token.accessToken
             }
@@ -75,7 +77,7 @@ public struct AppNetworkState {
     }
     public var refreshToken: String? {
         do {
-            let token = try OAuth2Token(key: environmentKey)
+            let token = try OAuth2Token(key: environmentKey, keychain: keychain)
             return token.refreshToken
         } catch {
             print(error)
@@ -84,7 +86,7 @@ public struct AppNetworkState {
     }
     public var client: (id: String, secret: String)? {
         do {
-            let client = try OAuth2Client(key: environmentKey)
+            let client = try OAuth2Client(key: environmentKey, keychain: keychain)
             return (id: client.id, secret: client.secret)
         } catch {
             print(error)
@@ -100,28 +102,36 @@ public struct AppNetworkState {
     private static let environmentKeyKey = "NetworkStack.environmentKey"
     private static let languageKey = "NetworkStack.languageKey"
     private static let appSlugKey = "NetworkStack.appSlugKey"
+    private static let keychainGroupKey = "NetworkStack.keychainGroupKey"
     private static let appNetworkStateKey = "NetworkStack.appNetworkState"
     
 
     // MARK: - Initializers
 
-    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, appSlug: String? = nil) {
+    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, keychain: Keychain, appSlug: String? = nil) {
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug ?? Bundle.main.identifier
+        self.keychain = keychain
     }
     
-    init(dictionary: [String: AnyObject]) throws {
+    init(dictionary: [String: Any]) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
+        guard let keychainGroup = dictionary[AppNetworkState.keychainGroupKey] as? String else { throw AppNetworkStateError.typeMismatch }
 		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
         
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug
+        if keychainGroup == "" {
+            keychain = Keychain()
+        } else {
+            keychain = Keychain(group: keychainGroup)
+        }
     }
     
     
@@ -134,20 +144,20 @@ public struct AppNetworkState {
 
     func saveToken(_ json: JSONObject) throws {
         let token = try OAuth2Token(object: json)
-        try token.lock(environmentKey)
+        try token.lock(environmentKey, keychain: keychain)
     }
 
     func saveClient(_ json: JSONObject) throws {
         let client = try OAuth2Client(object: json)
-        try client.lock(with: environmentKey)
+        try client.lock(with: environmentKey, keychain: keychain)
     }
     
     func deleteToken() {
-        OAuth2Token.delete(environmentKey)
+        OAuth2Token.delete(environmentKey, keychain: keychain)
     }
     
     func deleteClient() {
-        OAuth2Client.delete(with: environmentKey)
+        OAuth2Client.delete(with: environmentKey, keychain: keychain)
     }
 
 
@@ -155,10 +165,11 @@ public struct AppNetworkState {
 
     private static func persistState() {
         guard let currentState = savedCurrentAppState else { return }
-        var dictionary = [String: AnyObject]()
-        dictionary[apiURLStringKey] = currentState.apiURLString as AnyObject?
-        dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString as AnyObject?
-        dictionary[environmentKeyKey] = currentState.environmentKey as AnyObject?
+        var dictionary = [String: Any]()
+        dictionary[apiURLStringKey] = currentState.apiURLString
+        dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
+        dictionary[environmentKeyKey] = currentState.environmentKey
+        dictionary[keychainGroupKey] = currentState.keychain.group ?? ""
         
         UserDefaults.standard.set(dictionary, forKey: appNetworkStateKey)
     }

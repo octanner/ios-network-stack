@@ -15,7 +15,6 @@ struct OAuth2Client: Unmarshaling {
     let id: String
     let secret: String
     
-    private static let keychain = Keychain()
     private static let idKey = "client_id"
     private static let secretKey = "client_secret"
     
@@ -30,21 +29,21 @@ struct OAuth2Client: Unmarshaling {
         self.secret = try object <| OAuth2Client.secretKey
     }
     
-    init(key: String) throws {
-        let dictionary: MarshalDictionary = try OAuth2Client.keychain.valueForKey(OAuth2Client.clientKey(key))
+    init(key: String, keychain: Keychain) throws {
+        let dictionary: MarshalDictionary = try keychain.valueForKey(OAuth2Client.clientKey(key))
         try self.init(object: dictionary)
     }
     
-    func lock(with key: String) throws {
+    func lock(with key: String, keychain: Keychain) throws {
         let clientValues: NSDictionary = [
             OAuth2Client.idKey: id as AnyObject,
             OAuth2Client.secretKey: secret as AnyObject
         ]
-        try OAuth2Client.keychain.set(clientValues, forKey: OAuth2Client.clientKey(key))
+        try keychain.set(clientValues, forKey: OAuth2Client.clientKey(key))
     }
     
-    static func delete(with key: String) {
-        OAuth2Client.keychain.deleteValue(forKey: clientKey(key))
+    static func delete(with key: String, keychain: Keychain) {
+        keychain.deleteValue(forKey: clientKey(key))
     }
     
     private static func clientKey(_ key: String) -> String {
