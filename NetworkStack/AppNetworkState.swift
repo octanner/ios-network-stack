@@ -23,29 +23,26 @@ public struct AppNetworkState {
     // MARK: - Shared instances
 
     public static var currentAppState: AppNetworkState? {
-        get {
-            if let currentState = savedCurrentAppState {
-                return currentState
-            }
-            if let dictionary = UserDefaults.standard.object(forKey: AppNetworkState.appNetworkStateKey) as? [String: Any] {
-                do {
-                    let state = try AppNetworkState(dictionary: dictionary)
-                    savedCurrentAppState = state
-                    return state
-                } catch {
-                    return nil
-                }
-            }
-            return nil
-        }
-        set {
-            savedCurrentAppState = newValue
+        didSet {
             persistState()
         }
     }
 
-    private static var savedCurrentAppState: AppNetworkState?
-    
+    public static func loadAppState(from appGroup: String?) -> AppNetworkState? {
+        let defaults = UserDefaults(suiteName: appGroup) ?? UserDefaults.standard
+        if let dictionary = defaults.object(forKey: AppNetworkState.appNetworkStateKey) as? [String: Any] {
+            do {
+                let keychain = Keychain(group: appGroup)
+                let state = try AppNetworkState(dictionary: dictionary, keychain: keychain)
+                currentAppState = state
+                return state
+            } catch {
+                return nil
+            }
+        }
+        return nil
+    }
+
 
     // MARK: - Public properties
 
@@ -116,22 +113,17 @@ public struct AppNetworkState {
         self.keychain = keychain
     }
     
-    init(dictionary: [String: Any]) throws {
+    private init(dictionary: [String: Any], keychain: Keychain) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
-        guard let keychainGroup = dictionary[AppNetworkState.keychainGroupKey] as? String else { throw AppNetworkStateError.typeMismatch }
 		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
         
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug
-        if keychainGroup == "" {
-            keychain = Keychain()
-        } else {
-            keychain = Keychain(group: keychainGroup)
-        }
+        self.keychain = keychain
     }
     
     
@@ -164,14 +156,14 @@ public struct AppNetworkState {
     // MARK: - Private functions
 
     private static func persistState() {
-        guard let currentState = savedCurrentAppState else { return }
+        guard let currentState = currentAppState else { return }
         var dictionary = [String: Any]()
         dictionary[apiURLStringKey] = currentState.apiURLString
         dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
         dictionary[environmentKeyKey] = currentState.environmentKey
-        dictionary[keychainGroupKey] = currentState.keychain.group ?? ""
-        
-        UserDefaults.standard.set(dictionary, forKey: appNetworkStateKey)
+
+        let defaults = UserDefaults(suiteName: currentState.keychain.group) ?? UserDefaults.standard
+        defaults.set(dictionary, forKey: appNetworkStateKey)
     }
     
 }
