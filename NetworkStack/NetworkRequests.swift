@@ -32,7 +32,8 @@ public struct NetworkAPIRequests: NetworkRequests {
             "Accept": "application/json",
             "Authorization": "Bearer \(accessToken)",
             "Accept-Language": Bundle.main.acceptLanguages,
-            "X-Client-Id": appNetworkState.appVersionSlug
+            "X-Client-Id": appNetworkState.appVersionSlug,
+            "X-Hydrate": "true"
         ]
         configuration.httpAdditionalHeaders = headers
 
