@@ -8,6 +8,7 @@
 
 import Foundation
 import Marshal
+import SwiftyBeaver
 
 public struct Credentials {
     public var username: String
@@ -157,7 +158,8 @@ public struct AuthAPIRequests: AuthRequests {
         }
         
         URLCache.shared.removeAllCachedResponses()
-        
+
+        SwiftyBeaver.info("at=refresh-token token-last6=\(refreshToken.last(count: 6))")
         let session = activeSession
         network.post(to: url, using: session, with: parameters) { result, headers in
             switch result {
@@ -202,6 +204,17 @@ extension UIDevice {
         } else {
             return UIDevice.current.identifierForVendor!.uuidString
         }
+    }
+
+}
+
+
+extension String {
+
+    func last(count: Int) -> String {
+        let from = index(endIndex, offsetBy: -count, limitedBy: startIndex) ?? startIndex
+        let str = substring(from: from)
+        return str
     }
 
 }

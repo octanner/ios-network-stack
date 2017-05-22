@@ -13,8 +13,6 @@ import SwiftyBeaver
 
 // MARK: - Error
 
-fileprivate let log = SwiftyBeaver.self
-
 public enum NetworkError: LocalizedError {
 
     /// Attempted to request a malformed API endpoint
@@ -164,13 +162,13 @@ public struct Network {
             }
             if let error = error as? NSError, error.code == NSURLErrorTimedOut {
                 line += " \u{001b}[31mstatus=timed-out\u{001b}[0m"
-                log.error(line)
+                SwiftyBeaver.error(line)
                 self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
                 return
             }
             guard let response = response as? HTTPURLResponse else {
                 line += " \u{001b}[31mstatus=not-valid-http\u{001b}[0m"
-                log.error(line)
+                SwiftyBeaver.error(line)
                 self.finalizeNetworkCall(result: .error(NetworkError.responseNotValidHTTP), headers: nil, completion: completion)
                 return
             }
@@ -184,12 +182,12 @@ public struct Network {
                 line += " status=\(status)"
                 guard let data = data else {
                     line += "\u{001b}[31mbytes=0\u{001b}[0m"
-                    log.error(line)
+                    SwiftyBeaver.error(line)
                     self.finalizeNetworkCall(result: .error(NetworkError.noData), headers: headers, completion: completion)
                     return
                 }
                 line += " bytes=\(data.count)"
-                log.info(line)
+                SwiftyBeaver.info(line)
                 do {
                     if data.count > 0 {
 						if ProcessInfo.processInfo.environment["networkDebug"] == "YES" {
@@ -214,7 +212,7 @@ public struct Network {
                         print(String(data: data, encoding: .utf8) ?? "<no data>")
                     }
                 }
-                log.error(line)
+                SwiftyBeaver.error(line)
                 var message: JSONObject? = nil
                 if let data = data, data.count > 0 {
                     message = try? JSONParser.JSONObjectGuaranteed(with: data)
