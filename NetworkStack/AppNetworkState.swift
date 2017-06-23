@@ -51,9 +51,9 @@ public struct AppNetworkState {
     public let environmentKey: String
     public let appSlug: String
     public let keychain: Keychain
-    public static var loggedIn: Bool {
+    public static func loggedIn() throws -> Bool {
         guard let currentAppState = currentAppState else { return false }
-        return currentAppState.accessToken != nil
+        return try currentAppState.accessToken() != nil
     }
     public static var defaultAppVersionSlug: String {
         return Bundle.main.identifierBuildVersion
@@ -61,34 +61,21 @@ public struct AppNetworkState {
     public var appVersionSlug: String {
         return "\(appSlug)-\(Bundle.main.buildVersion)"
     }
-    public var accessToken: String? {
-        do {
-            let token = try OAuth2Token(key: environmentKey, keychain: keychain)
-            if Date().compare(token.expiresAt) == .orderedAscending {
-                return token.accessToken
-            }
-        } catch {
-            print(error)
+    public func accessToken() throws -> String? {
+        guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return nil }
+        if Date().compare(token.expiresAt) == .orderedAscending {
+            return token.accessToken
+        } else {
+            return nil
         }
-        return nil
     }
-    public var refreshToken: String? {
-        do {
-            let token = try OAuth2Token(key: environmentKey, keychain: keychain)
-            return token.refreshToken
-        } catch {
-            print(error)
-        }
-        return nil
+    public func refreshToken() throws -> String? {
+        guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return nil }
+        return token.refreshToken
     }
-    public var client: (id: String, secret: String)? {
-        do {
-            let client = try OAuth2Client(key: environmentKey, keychain: keychain)
-            return (id: client.id, secret: client.secret)
-        } catch {
-            print(error)
-        }
-        return nil
+    public func client() throws -> (id: String, secret: String)? {
+        guard let client = try OAuth2Client(key: environmentKey, keychain: keychain) else { return nil }
+        return (id: client.id, secret: client.secret)
     }
     
     

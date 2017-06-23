@@ -34,6 +34,7 @@ public struct AuthAPIRequests: AuthRequests {
     
     public enum AuthError: Error {
         case refreshTokenMissing
+        case clientCredentialsMissing
     }
     
 
@@ -142,20 +143,28 @@ public struct AuthAPIRequests: AuthRequests {
     
     public func refreshToken(completion: @escaping Network.ResponseCompletion) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
-        guard let refreshToken = appNetworkState.refreshToken else { return completion(.error(AuthError.refreshTokenMissing), nil) }
+        var token: String?
+        var clientCreds: (id: String, secret: String)?
+        do {
+            token = try appNetworkState.refreshToken()
+            clientCreds = try appNetworkState.client()
+        } catch {
+            completion(.error(error), nil)
+            return
+        }
+        guard let refreshToken = token else { return completion(.error(AuthError.refreshTokenMissing), nil) }
+        guard let client = clientCreds else { return completion(.error(AuthError.clientCredentialsMissing), nil) }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
             completion(.error(error), nil)
             return
         }
-        var parameters = [
+        var parameters: [String:Any] = [
             "grant_type": "refresh_token",
             "refresh_token" : refreshToken
         ]
-        if let client = appNetworkState.client {
-            parameters["client_id"] = client.id
-            parameters["client_secret"] = client.secret
-        }
+        parameters["client_id"] = client.id
+        parameters["client_secret"] = client.secret
         
         URLCache.shared.removeAllCachedResponses()
 

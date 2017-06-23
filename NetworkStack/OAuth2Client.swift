@@ -29,8 +29,8 @@ struct OAuth2Client: Unmarshaling {
         self.secret = try object <| OAuth2Client.secretKey
     }
     
-    init(key: String, keychain: Keychain) throws {
-        let dictionary: MarshalDictionary = try keychain.valueForKey(OAuth2Client.clientKey(key))
+    init?(key: String, keychain: Keychain) throws {
+        guard let dictionary: MarshalDictionary = try keychain.optionalForKey(OAuth2Client.clientKey(key)) else { return nil }
         try self.init(object: dictionary)
     }
     

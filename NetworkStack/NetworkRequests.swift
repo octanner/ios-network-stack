@@ -23,9 +23,9 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     var network = Network()
     
-    fileprivate var defaultSession: URLSession? {
+    fileprivate func defaultSession() throws -> URLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
-        guard let accessToken = appNetworkState.accessToken else { return nil }
+        guard let accessToken = try appNetworkState.accessToken() else { return nil }
         let configuration = URLSessionConfiguration.default
 
         let headers: [String:String] = [
@@ -41,8 +41,11 @@ public struct NetworkAPIRequests: NetworkRequests {
         return URLSession(configuration: configuration)
     }
 
-    fileprivate var activeSession: URLSession? {
-        return overrideSession ?? defaultSession
+    fileprivate func activeSession() throws -> URLSession? {
+        if overrideSession != nil {
+            return overrideSession
+        }
+        return try defaultSession()
     }
     
     public var overrideSession: URLSession?
@@ -112,7 +115,7 @@ public struct NetworkAPIRequests: NetworkRequests {
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     private func config(endpoint: String) throws -> (session: URLSession, url: URL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
-        guard let session = activeSession else { throw NetworkError.status(status: 401, message: [ "statusMessage": "Networking stack is misconfigured. Restart the app."]) }
+        guard let session = try activeSession() else { throw NetworkError.status(status: 401, message: [ "statusMessage": "Networking stack is misconfigured. Restart the app."]) }
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
