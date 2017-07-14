@@ -11,6 +11,7 @@ import Marshal
 
 public protocol NetworkRequests {
     func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
@@ -68,6 +69,23 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
     
+    public func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+        do {
+            let result = try self.config(endpoint: endpoint)
+            var session = result.session
+            let config = result.session.configuration
+            if var headers = config.httpAdditionalHeaders {
+                headers["Accept"] = "application/hyper+json"
+                config.httpAdditionalHeaders = headers
+                session = URLSession(configuration: config)
+            }
+            network.get(from: result.url, using: session, with: parameters, completion: completion)
+        }
+        catch {
+            completion(.error(error), nil)
+        }
+    }
+
     public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
