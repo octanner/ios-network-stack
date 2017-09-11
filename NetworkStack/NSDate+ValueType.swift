@@ -33,22 +33,21 @@ public extension Date {
     
     static fileprivate let ISO8601MillisecondFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-        let tz = TimeZone(abbreviation:"GMT")
-        formatter.timeZone = tz
         return formatter
     }()
     
     static fileprivate let ISO8601SecondFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        let tz = TimeZone(abbreviation:"GMT")
-        formatter.timeZone = tz
         return formatter
     }()
     
     static fileprivate let ISO8601YearMonthDayFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
