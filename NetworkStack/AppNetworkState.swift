@@ -69,6 +69,10 @@ public struct AppNetworkState {
             return nil
         }
     }
+    public func isJWT() throws -> Bool {
+        guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return false }
+        return token.accessToken.contains(".")
+    }
     public func refreshToken() throws -> String? {
         guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return nil }
         return token.refreshToken
