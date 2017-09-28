@@ -222,7 +222,7 @@ extension String {
 
     func last(count: Int) -> String {
         let from = index(endIndex, offsetBy: -count, limitedBy: startIndex) ?? startIndex
-        let str = substring(from: from)
+        let str = String(self[from...])
         return str
     }
 

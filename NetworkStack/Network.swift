@@ -121,7 +121,7 @@ public struct Network {
         }
 
         var headers = request.allHTTPHeaderFields ?? [:]
-        var requestId = UUID().uuidString
+        let requestId = UUID().uuidString
         headers["X-Request-ID"] = requestId
         switch requestType {
         case .post, .put, .patch:
@@ -160,7 +160,7 @@ public struct Network {
             } else {
                 line += " \u{001b}[31mservice=\(duration)ms\u{001b}[0m"
             }
-            if let error = error as? NSError, error.code == NSURLErrorTimedOut {
+            if let error = error as NSError?, error.code == NSURLErrorTimedOut {
                 line += " \u{001b}[31mstatus=timed-out\u{001b}[0m"
                 SwiftyBeaver.error(line)
                 self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
