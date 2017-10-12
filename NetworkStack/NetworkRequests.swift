@@ -11,6 +11,7 @@ import Marshal
 
 public protocol NetworkRequests {
     func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion)
     func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
@@ -56,6 +57,16 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
     
+    public func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint: components.path ?? "")
+            components.path = url.absoluteString
+            network.get(from: components, using: session, completion: completion)
+        } catch {
+            completion(.error(error))
+        }
+    }
+
     public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
@@ -107,5 +118,5 @@ public struct NetworkAPIRequests: NetworkRequests {
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
-    
+
 }
