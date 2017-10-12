@@ -12,6 +12,7 @@ import Marshal
 public protocol NetworkRequests {
     func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion)
     func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
@@ -19,11 +20,11 @@ public protocol NetworkRequests {
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
-    
+
     // MARK: - Properties
-    
+
     var network = Network()
-    
+
     fileprivate func defaultSession() throws -> URLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = try appNetworkState.accessToken() else { return nil }
@@ -48,17 +49,17 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
         return try defaultSession()
     }
-    
+
     public var overrideSession: URLSession?
 
-    
+
     // MARK: - Initializers
-    
+
     public init() { }
-    
-    
+
+
     // MARK: - Public API
-    
+
     public func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
@@ -68,7 +69,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             completion(.error(error), nil)
         }
     }
-    
+
     public func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let result = try self.config(endpoint: endpoint)
@@ -86,6 +87,16 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
+    public func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint: components.path ?? "")
+            components.path = url.absoluteString
+            network.get(from: components, using: session, completion: completion)
+        } catch {
+            completion(.error(error))
+        }
+    }
+
     public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
@@ -95,7 +106,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             completion(.error(error), nil)
         }
     }
-    
+
     public func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
@@ -105,7 +116,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             completion(.error(error), nil)
         }
     }
-    
+
     public func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
@@ -115,18 +126,18 @@ public struct NetworkAPIRequests: NetworkRequests {
             completion(.error(error), nil)
         }
     }
-    
+
     public func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
             network.delete(at: url, using: session, completion: completion)
         }
-            
+
         catch {
             completion(.error(error), nil)
         }
     }
-    
+
 
     // MARK: - Private functions
 
@@ -137,5 +148,5 @@ public struct NetworkAPIRequests: NetworkRequests {
         guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }
         return (session, url)
     }
-    
+
 }
