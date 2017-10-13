@@ -91,11 +91,11 @@ public struct Network {
     }
 
     public func get(from components: NSURLComponents, using session: URLSession, completion: @escaping Network.ResponseCompletion) {
-        guard let _url: URL = components.url else {
+        guard let url: URL = components.url else {
             completion(.error(NetworkError.malformedEndpoint(endpoint: components.path ?? "Unknown")))
             return
         }
-        perform(action: .get, at: _url, using: session, with: nil, completion: completion)
+        perform(action: .get, at: url, using: session, with: nil, completion: completion)
     }
 
     public func post(to url: URL, using session: URLSession, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
