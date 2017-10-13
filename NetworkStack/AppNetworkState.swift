@@ -112,15 +112,13 @@ public struct AppNetworkState {
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
 		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
-        if let secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlString] as? String {
-            self.secondaryApiUrlString = secondaryApiUrlString
-        }
 
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug
         self.keychain = keychain
+        self.secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlString] as? String
     }
 
 

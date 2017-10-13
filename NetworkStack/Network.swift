@@ -91,7 +91,7 @@ public struct Network {
     }
     public func get(from components: NSURLComponents, using session: URLSession, completion: @escaping Network.ResponseCompletion) {
         guard let url: URL = components.url else {
-            completion(.error(NetworkError.malformedEndpoint(endpoint: components.path ?? "Unknown")))
+            completion(.error(NetworkError.malformedEndpoint(endpoint: components.path ?? "Unknown")), nil)
             return
         }
         perform(action: .get, at: url, using: session, with: nil, completion: completion)

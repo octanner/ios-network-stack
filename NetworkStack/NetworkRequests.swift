@@ -93,7 +93,7 @@ public struct NetworkAPIRequests: NetworkRequests {
             components.path = url.absoluteString
             network.get(from: components, using: session, completion: completion)
         } catch {
-            completion(.error(error))
+            completion(.error(error), nil)
         }
     }
 
