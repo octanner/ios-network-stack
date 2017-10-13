@@ -47,7 +47,7 @@ public struct AppNetworkState {
     // MARK: - Public properties
 
     public let apiURLString: String
-    public let secondaryApiUrlString: String
+    public let secondaryApiUrlString: String?
     public let tokenEndpointURLString: String
     public let environmentKey: String
     public let appSlug: String
@@ -98,7 +98,7 @@ public struct AppNetworkState {
 
     // MARK: - Initializers
 
-    public init(apiURLString: String, secondaryApiUrlString: String, tokenEndpointURLString: String, environmentKey: String, keychain: Keychain, appSlug: String? = nil) {
+    public init(apiURLString: String, secondaryApiUrlString: String?, tokenEndpointURLString: String, environmentKey: String, keychain: Keychain, appSlug: String? = nil) {
         self.apiURLString = apiURLString
         self.secondaryApiUrlString = secondaryApiUrlString
         self.tokenEndpointURLString = tokenEndpointURLString
@@ -109,13 +109,14 @@ public struct AppNetworkState {
 
     private init(dictionary: [String: Any], keychain: Keychain) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
-        guard let secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlString] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
 		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
+        if let secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlString] as? String {
+            self.secondaryApiUrlString = secondaryApiUrlString
+        }
 
         self.apiURLString = apiURLString
-        self.secondaryApiUrlString = secondaryApiUrlString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug
@@ -126,7 +127,7 @@ public struct AppNetworkState {
     // MARK: - Internal helper functions
 
     func urlForEndpoint(_ endpoint: String) -> URL? {
-        if let baseURL = URL(string: secondaryApiUrlString), endpoint.contains("victories/recognitions") {
+        if let secondaryUrlString = secondaryApiUrlString, let baseURL = URL(string: secondaryUrlString), endpoint.starts(with: "victories") {
             return URL(string: endpoint, relativeTo: baseURL)
         } else if let baseURL = URL(string: apiURLString) {
             return URL(string: endpoint, relativeTo: baseURL)
@@ -160,9 +161,11 @@ public struct AppNetworkState {
         guard let currentState = currentAppState else { return }
         var dictionary = [String: Any]()
         dictionary[apiURLStringKey] = currentState.apiURLString
-        dictionary[secondaryApiUrlString] = currentState.secondaryApiUrlString
         dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
         dictionary[environmentKeyKey] = currentState.environmentKey
+        if let secondaryApiUrlString = currentState.secondaryApiUrlString {
+            dictionary[secondaryApiUrlString] = secondaryApiUrlString
+        }
 
         let defaults = UserDefaults(suiteName: currentState.keychain.group) ?? UserDefaults.standard
         defaults.set(dictionary, forKey: appNetworkStateKey)
