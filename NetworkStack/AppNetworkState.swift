@@ -127,7 +127,7 @@ public struct AppNetworkState {
     // MARK: - Internal helper functions
 
     func urlForEndpoint(_ endpoint: String) -> URL? {
-        if let secondaryUrlString = secondaryApiUrlString, let baseURL = URL(string: secondaryUrlString), endpoint.starts(with: "victories") {
+        if let secondaryUrlString = secondaryApiUrlString, let baseURL = URL(string: secondaryUrlString), endpoint.starts(with: "/victories") {
             return URL(string: endpoint, relativeTo: baseURL)
         } else if let baseURL = URL(string: apiURLString) {
             return URL(string: endpoint, relativeTo: baseURL)
