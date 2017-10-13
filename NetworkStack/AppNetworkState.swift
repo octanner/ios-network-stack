@@ -12,13 +12,13 @@ import SimpleKeychain
 
 
 public struct AppNetworkState {
-    
+
     // MARK: - Error
-    
+
     enum AppNetworkStateError: Error {
         case typeMismatch
     }
-    
+
 
     // MARK: - Shared instances
 
@@ -47,6 +47,7 @@ public struct AppNetworkState {
     // MARK: - Public properties
 
     public let apiURLString: String
+    public let secondaryApiUrlString: String
     public let tokenEndpointURLString: String
     public let environmentKey: String
     public let appSlug: String
@@ -81,48 +82,57 @@ public struct AppNetworkState {
         guard let client = try OAuth2Client(key: environmentKey, keychain: keychain) else { return nil }
         return (id: client.id, secret: client.secret)
     }
-    
-    
+
+
     // MARK: - Constants
 
     private static let apiURLStringKey = "NetworkStack.apiURLString"
+    private static let secondaryApiUrlString = "NetworkStack.secondaryApiURLString"
     private static let tokenEndpointURLStringKey = "NetworkStack.tokenEndpointURLString"
     private static let environmentKeyKey = "NetworkStack.environmentKey"
     private static let languageKey = "NetworkStack.languageKey"
     private static let appSlugKey = "NetworkStack.appSlugKey"
     private static let keychainGroupKey = "NetworkStack.keychainGroupKey"
     private static let appNetworkStateKey = "NetworkStack.appNetworkState"
-    
+
 
     // MARK: - Initializers
 
-    public init(apiURLString: String, tokenEndpointURLString: String, environmentKey: String, keychain: Keychain, appSlug: String? = nil) {
+    public init(apiURLString: String, secondaryApiUrlString: String, tokenEndpointURLString: String, environmentKey: String, keychain: Keychain, appSlug: String? = nil) {
         self.apiURLString = apiURLString
+        self.secondaryApiUrlString = secondaryApiUrlString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug ?? Bundle.main.identifier
         self.keychain = keychain
     }
-    
+
     private init(dictionary: [String: Any], keychain: Keychain) throws {
         guard let apiURLString = dictionary[AppNetworkState.apiURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
+        guard let secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlString] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
 		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
-        
+
         self.apiURLString = apiURLString
+        self.secondaryApiUrlString = secondaryApiUrlString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
         self.appSlug = appSlug
         self.keychain = keychain
     }
-    
-    
+
+
     // MARK: - Internal helper functions
 
     func urlForEndpoint(_ endpoint: String) -> URL? {
-        guard let baseURL = URL(string: apiURLString) else { return nil }
-        return URL(string: endpoint, relativeTo: baseURL)
+        if let baseURL = URL(string: secondaryApiUrlString), endpoint.contains("victories/recognitions") {
+            return URL(string: endpoint, relativeTo: baseURL)
+        } else if let baseURL = URL(string: apiURLString) {
+            return URL(string: endpoint, relativeTo: baseURL)
+        } else {
+                return nil
+        }
     }
 
     func saveToken(_ json: JSONObject) throws {
@@ -134,11 +144,11 @@ public struct AppNetworkState {
         let client = try OAuth2Client(object: json)
         try client.lock(with: environmentKey, keychain: keychain)
     }
-    
+
     func deleteToken() {
         OAuth2Token.delete(environmentKey, keychain: keychain)
     }
-    
+
     func deleteClient() {
         OAuth2Client.delete(with: environmentKey, keychain: keychain)
     }
@@ -150,11 +160,12 @@ public struct AppNetworkState {
         guard let currentState = currentAppState else { return }
         var dictionary = [String: Any]()
         dictionary[apiURLStringKey] = currentState.apiURLString
+        dictionary[secondaryApiUrlString] = currentState.secondaryApiUrlString
         dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
         dictionary[environmentKeyKey] = currentState.environmentKey
 
         let defaults = UserDefaults(suiteName: currentState.keychain.group) ?? UserDefaults.standard
         defaults.set(dictionary, forKey: appNetworkStateKey)
     }
-    
+
 }
