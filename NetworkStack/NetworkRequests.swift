@@ -87,14 +87,13 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func get(fromComponents: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
+    public func get(from fromComponents: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: fromComponents.path ?? "")
-            guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true) else {
-                network.get(from: url, using: session, with: nil, completion: completion)
-                return
-            }
-            components.queryItems = fromComponents.queryItems
+            let (session, url) = try config(endpoint: components.path ?? "")
+            components.path = url.path
+            components.host = url.host
+            components.scheme = url.scheme
+            
             network.get(from: components, using: session, completion: completion)
         } catch {
             completion(.error(error), nil)
