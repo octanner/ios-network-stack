@@ -90,7 +90,10 @@ public struct NetworkAPIRequests: NetworkRequests {
     public func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: components.path ?? "")
-            components.path = url.absoluteString
+            components.path = url.path
+            components.host = url.host
+            components.scheme = url.scheme
+            
             network.get(from: components, using: session, completion: completion)
         } catch {
             completion(.error(error), nil)
