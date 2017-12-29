@@ -52,7 +52,7 @@ public struct AuthAPIRequests: AuthRequests {
         if let appNetworkState = AppNetworkState.currentAppState {
             appVersionSlug = appNetworkState.appVersionSlug
         }
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
 
         let headers: [String:String] = [
             "Accept": "application/json",

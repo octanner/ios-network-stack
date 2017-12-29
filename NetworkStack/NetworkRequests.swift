@@ -28,7 +28,7 @@ public struct NetworkAPIRequests: NetworkRequests {
     fileprivate func defaultSession() throws -> URLSession? {
         guard let appNetworkState = AppNetworkState.currentAppState else { return nil }
         guard let accessToken = try appNetworkState.accessToken() else { return nil }
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
 
         let headers: [String:String] = [
             "Accept": "application/json",
