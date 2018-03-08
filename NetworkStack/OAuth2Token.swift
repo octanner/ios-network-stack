@@ -21,7 +21,7 @@ struct OAuth2Token: Unmarshaling {
     private static let expiresInKey = "expires_in"
     private static let refreshTokenKey = "refresh_token"
     
-    init(accessToken: String, expiresAt: Date = Date.distantFuture, refreshToken: String? = nil) {
+    init(accessToken: String, expiresAt: Date = Date.distantPast, refreshToken: String? = nil) {
         self.accessToken = accessToken
         self.expiresAt = expiresAt
         self.refreshToken = refreshToken
@@ -53,6 +53,18 @@ struct OAuth2Token: Unmarshaling {
 
     static func delete(_ key: String, keychain: Keychain) {
         keychain.deleteValue(forKey: tokenKey(key))
+    }
+
+    static func expireAccessToken(with key: String, keychain: Keychain) {
+        do {
+            guard let dictionary: MarshaledObject = try keychain.valueForKey(OAuth2Token.tokenKey(key)) else { return }
+            let accessToken: String = try dictionary.value(for: OAuth2Token.accessTokenKey)
+            let refreshToken: String? = try dictionary.value(for: OAuth2Token.refreshTokenKey)
+            let expiredOAuth2Token = OAuth2Token(accessToken: accessToken, expiresAt: Date.distantPast, refreshToken: refreshToken)
+            try expiredOAuth2Token.lock(key, keychain: keychain)
+        } catch {
+            // If we can't access the token structure, don't propagate the error
+        }
     }
     
     private static func tokenKey(_ key: String) -> String {

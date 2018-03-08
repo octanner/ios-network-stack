@@ -149,6 +149,10 @@ public struct AppNetworkState {
         OAuth2Token.delete(environmentKey, keychain: keychain)
     }
 
+    func expireAccessToken() {
+        OAuth2Token.expireAccessToken(with: environmentKey, keychain: keychain)
+    }
+
     func deleteClient() {
         OAuth2Client.delete(with: environmentKey, keychain: keychain)
     }

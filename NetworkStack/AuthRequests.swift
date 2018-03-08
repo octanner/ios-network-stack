@@ -26,6 +26,7 @@ public protocol AuthRequests {
     func authenticate(with tokenJSON: JSONObject) throws
     func refreshToken(completion: @escaping Network.ResponseCompletion)
     func logOut()
+    func expireAccessToken()
 }
 
 public struct AuthAPIRequests: AuthRequests {
@@ -196,6 +197,12 @@ public struct AuthAPIRequests: AuthRequests {
         URLCache.shared.removeAllCachedResponses()
         appNetworkState.deleteToken()
         appNetworkState.deleteClient()
+    }
+
+    public func expireAccessToken() {
+        guard let appNetworkState = AppNetworkState.currentAppState else { return }
+        URLCache.shared.removeAllCachedResponses()
+        appNetworkState.expireAccessToken()
     }
 
 }
