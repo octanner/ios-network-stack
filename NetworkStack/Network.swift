@@ -30,6 +30,15 @@ public enum NetworkError: LocalizedError {
     /// Response timed out
     case timeout
 
+    /// No conncection to the internet detected
+    case noInternetConnection
+
+    /// Attempt was cancelled
+    case cancelled
+
+    // The access tokens are missing or incorrect
+    case networkStackMisconfigured
+
     public var errorDescription: String? {
         switch self {
         case .malformedEndpoint(let endpoint):
@@ -49,6 +58,12 @@ public enum NetworkError: LocalizedError {
             return "Response returned with no data"
         case .timeout:
             return "Response timed out"
+        case .noInternetConnection:
+            return "No internet conncection"
+        case .cancelled:
+            return "Request was cancelled"
+        case .networkStackMisconfigured:
+            return "Networking stack is misconfigured. Restart the app."
         }
     }
 
@@ -167,12 +182,28 @@ public struct Network {
             } else {
                 line += " \u{001b}[31mservice=\(duration)ms\u{001b}[0m"
             }
-            if let error = error as NSError?, error.code == NSURLErrorTimedOut {
-                line += " \u{001b}[31mstatus=timed-out\u{001b}[0m"
-                SwiftyBeaver.error(line)
-                self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
-                return
+            if let error = error {
+                switch error {
+                case URLError.notConnectedToInternet:
+                    line += " \u{001b}[31mstatus=not-internet\u{001b}[0m"
+                    SwiftyBeaver.error(line)
+                    self.finalizeNetworkCall(result: .error(NetworkError.noInternetConnection), headers: nil, completion: completion)
+                    return
+                case URLError.timedOut:
+                    line += " \u{001b}[31mstatus=timed-out\u{001b}[0m"
+                    SwiftyBeaver.error(line)
+                    self.finalizeNetworkCall(result: .error(NetworkError.timeout), headers: nil, completion: completion)
+                    return
+                case URLError.cancelled:
+                    line += " \u{001b}[31mstatus=cancelled\u{001b}[0m"
+                    SwiftyBeaver.error(line)
+                    self.finalizeNetworkCall(result: .error(NetworkError.cancelled), headers: nil, completion: completion)
+                    return
+                default:
+                    break
+                }
             }
+
             guard let response = response as? HTTPURLResponse else {
                 line += " \u{001b}[31mstatus=not-valid-http\u{001b}[0m"
                 SwiftyBeaver.error(line)
