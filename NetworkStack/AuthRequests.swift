@@ -78,7 +78,10 @@ public struct AuthAPIRequests: AuthRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     public func authenticate(with credentials: Credentials, completion: @escaping Network.ResponseCompletion) {
-        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else {
+            completion(.error(networkMisconfigured()), nil)
+            return
+        }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
             completion(.error(error), nil)
@@ -110,7 +113,10 @@ public struct AuthAPIRequests: AuthRequests {
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     public func authenticate(with pairingCode: String, completion: @escaping Network.ResponseCompletion) {
-        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else {
+            completion(.error(networkMisconfigured()), nil)
+            return
+        }
         guard let url = URL(string: appNetworkState.tokenEndpointURLString) else {
             let error = NetworkError.malformedEndpoint(endpoint: appNetworkState.tokenEndpointURLString)
             completion(.error(error), nil)
@@ -143,7 +149,10 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     public func refreshToken(completion: @escaping Network.ResponseCompletion) {
-        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else {
+            completion(.error(networkMisconfigured()), nil)
+            return
+        }
         var token: String?
         var clientCreds: (id: String, secret: String)?
         do {
@@ -185,10 +194,16 @@ public struct AuthAPIRequests: AuthRequests {
             }
         }
     }
+
+    private func networkMisconfigured() -> NetworkError {
+        let msg = "Must configure current app state to log in"
+        let error = NetworkError.status(status: 900, message: [ "statusText": msg])
+        return error
+    }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     public func authenticate(with tokenJSON: JSONObject) throws {
-        guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to log in") }
+        guard let appNetworkState = AppNetworkState.currentAppState else { throw networkMisconfigured() }
         try appNetworkState.saveToken(tokenJSON)
     }
     
