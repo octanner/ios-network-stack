@@ -10,4 +10,7 @@
    <FileRef
       location = "group:Carthage/Checkouts/Marshal/Marshal.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:Carthage/Checkouts/SwiftyBeaver/SwiftyBeaver.xcodeproj">
+   </FileRef>
 </Workspace>
