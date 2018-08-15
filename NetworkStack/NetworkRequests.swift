@@ -14,6 +14,7 @@ public protocol NetworkRequests {
     func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion)
     func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func post(to endpoint: String, with parameters: JSONObject?, timeoutLength: TimeInterval?, completion: @escaping Network.ResponseCompletion)
     func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion)
@@ -103,6 +104,19 @@ public struct NetworkAPIRequests: NetworkRequests {
     public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
             let (session, url) = try config(endpoint: endpoint)
+            network.post(to: url, using: session, with: parameters, completion: completion)
+        }
+        catch {
+            completion(.error(error), nil)
+        }
+    }
+
+    public func post(to endpoint: String, with parameters: JSONObject?, timeoutLength: TimeInterval? = nil, completion: @escaping Network.ResponseCompletion) {
+        do {
+            let (session, url) = try config(endpoint: endpoint)
+            if let timeoutLength = timeoutLength {
+                session.configuration.timeoutIntervalForRequest = timeoutLength
+            }
             network.post(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
