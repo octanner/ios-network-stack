@@ -30,7 +30,7 @@ public enum NetworkError: LocalizedError {
     /// Response timed out
     case timeout
 
-    /// No conncection to the internet detected
+    /// No connection to the internet detected
     case noInternetConnection
 
     /// Attempt was cancelled
@@ -59,7 +59,7 @@ public enum NetworkError: LocalizedError {
         case .timeout:
             return "Response timed out"
         case .noInternetConnection:
-            return "No internet conncection"
+            return "No internet connection"
         case .cancelled:
             return "Request was cancelled"
         case .networkStackMisconfigured:
