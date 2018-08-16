@@ -57,7 +57,7 @@ public struct AppNetworkState {
         return try currentAppState.accessToken() != nil
     }
     public static var defaultAppVersionSlug: String {
-        return Bundle.main.identifierBuildVersion
+        return "vision-ios"
     }
     public var appVersionSlug: String {
         return "\(appSlug)-\(Bundle.main.buildVersion)"
@@ -103,7 +103,7 @@ public struct AppNetworkState {
         self.secondaryApiUrlString = secondaryApiUrlString
         self.tokenEndpointURLString = tokenEndpointURLString
         self.environmentKey = environmentKey
-        self.appSlug = appSlug ?? Bundle.main.identifier
+        self.appSlug = appSlug ?? "vision-ios"
         self.keychain = keychain
     }
 
@@ -112,7 +112,7 @@ public struct AppNetworkState {
         guard let tokenEndpointURLString = dictionary[AppNetworkState.tokenEndpointURLStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let environmentKey = dictionary[AppNetworkState.environmentKeyKey] as? String else { throw AppNetworkStateError.typeMismatch }
         guard let secondaryApiUrlString = dictionary[AppNetworkState.secondaryApiUrlStringKey] as? String else { throw AppNetworkStateError.typeMismatch }
-		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? Bundle.main.identifier
+		let appSlug = dictionary[AppNetworkState.appSlugKey] as? String ?? "vision-ios"
 
         self.apiURLString = apiURLString
         self.tokenEndpointURLString = tokenEndpointURLString
@@ -167,6 +167,7 @@ public struct AppNetworkState {
         dictionary[tokenEndpointURLStringKey] = currentState.tokenEndpointURLString
         dictionary[environmentKeyKey] = currentState.environmentKey
         dictionary[secondaryApiUrlStringKey] = currentState.secondaryApiUrlString
+        dictionary[appSlugKey] = currentState.appSlug
 
         let defaults = UserDefaults(suiteName: currentState.keychain.group) ?? UserDefaults.standard
         defaults.set(dictionary, forKey: appNetworkStateKey)
