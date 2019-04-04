@@ -10,14 +10,14 @@ import Foundation
 import Marshal
 
 public protocol NetworkRequests {
-    func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func get(from endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func hyperGet(from endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
     func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion)
-    func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func post(to endpoint: String, with parameters: JSONObject?, timeoutLength: TimeInterval?, completion: @escaping Network.ResponseCompletion)
-    func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
-    func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion)
+    func post(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func post(to endpoint: API, with parameters: JSONObject?, timeoutLength: TimeInterval?, completion: @escaping Network.ResponseCompletion)
+    func patch(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func put(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion)
+    func delete(at endpoint: API, completion: @escaping Network.ResponseCompletion)
 }
 
 public struct NetworkAPIRequests: NetworkRequests {
@@ -61,9 +61,9 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     // MARK: - Public API
 
-    public func get(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func get(from endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             network.get(from: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -71,9 +71,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func hyperGet(from endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func hyperGet(from endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let result = try self.config(endpoint: endpoint)
+            let result = try self.config(api: endpoint)
             var session = result.session
             let config = result.session.configuration
             if var headers = config.httpAdditionalHeaders {
@@ -90,7 +90,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     public func get(from components: NSURLComponents, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: components.path ?? "")
+            let (session, url) = try config(api: API(components.path ?? ""))
             components.path = url.path
             components.host = url.host
             components.scheme = url.scheme
@@ -101,9 +101,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func post(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func post(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             network.post(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -111,9 +111,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func post(to endpoint: String, with parameters: JSONObject?, timeoutLength: TimeInterval? = nil, completion: @escaping Network.ResponseCompletion) {
+    public func post(to endpoint: API, with parameters: JSONObject?, timeoutLength: TimeInterval? = nil, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             if let timeoutLength = timeoutLength {
                 session.configuration.timeoutIntervalForRequest = timeoutLength
             }
@@ -124,9 +124,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func patch(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func patch(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             network.patch(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -134,9 +134,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func put(to endpoint: String, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
+    public func put(to endpoint: API, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             network.put(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -144,9 +144,9 @@ public struct NetworkAPIRequests: NetworkRequests {
         }
     }
 
-    public func delete(at endpoint: String, completion: @escaping Network.ResponseCompletion) {
+    public func delete(at endpoint: API, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint)
+            let (session, url) = try config(api: endpoint)
             network.delete(at: url, using: session, completion: completion)
         }
 
@@ -159,10 +159,10 @@ public struct NetworkAPIRequests: NetworkRequests {
     // MARK: - Private functions
 
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    private func config(endpoint: String) throws -> (session: URLSession, url: URL) {
+    private func config(api: API) throws -> (session: URLSession, url: URL) {
         guard let appNetworkState = AppNetworkState.currentAppState else { fatalError("Must configure current app state to config") }
         guard let session = try activeSession() else { throw NetworkError.status(status: 401, message: [ "statusMessage": "Networking stack is misconfigured. Restart the app."]) }
-        guard let url = appNetworkState.urlForEndpoint(endpoint) else { throw NetworkError.malformedEndpoint(endpoint: endpoint) }
+        guard let url = appNetworkState.urlForEndpoint(api.endpoint) else { throw NetworkError.malformedEndpoint(endpoint: api.endpoint) }
         return (session, url)
     }
 
