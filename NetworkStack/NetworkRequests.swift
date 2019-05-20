@@ -72,7 +72,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     public func get(from endpoint: EndpointType, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint.value)
+            let (session, url) = try config(endpoint: endpoint)
             network.get(from: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -82,7 +82,7 @@ public struct NetworkAPIRequests: NetworkRequests {
     
     public func hyperGet(from endpoint: EndpointType, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let result = try self.config(endpoint: endpoint.value)
+            let result = try self.config(endpoint: endpoint)
             var session = result.session
             let config = result.session.configuration
             if var headers = config.httpAdditionalHeaders {
@@ -111,18 +111,12 @@ public struct NetworkAPIRequests: NetworkRequests {
     }
     
     public func post(to endpoint: EndpointType, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
-        do {
-            let (session, url) = try config(endpoint: endpoint.value)
-            network.post(to: url, using: session, with: parameters, completion: completion)
-        }
-        catch {
-            completion(.error(error), nil)
-        }
+        post(to: endpoint, with: parameters, timeoutLength: nil, completion: completion)
     }
     
     public func post(to endpoint: EndpointType, with parameters: JSONObject?, timeoutLength: TimeInterval? = nil, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint.value)
+            let (session, url) = try config(endpoint: endpoint)
             if let timeoutLength = timeoutLength {
                 session.configuration.timeoutIntervalForRequest = timeoutLength
             }
@@ -135,7 +129,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     public func patch(to endpoint: EndpointType, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint.value)
+            let (session, url) = try config(endpoint: endpoint)
             network.patch(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -145,7 +139,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     public func put(to endpoint: EndpointType, with parameters: JSONObject?, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint.value)
+            let (session, url) = try config(endpoint: endpoint)
             network.put(to: url, using: session, with: parameters, completion: completion)
         }
         catch {
@@ -155,7 +149,7 @@ public struct NetworkAPIRequests: NetworkRequests {
 
     public func delete(at endpoint: EndpointType, completion: @escaping Network.ResponseCompletion) {
         do {
-            let (session, url) = try config(endpoint: endpoint.value)
+            let (session, url) = try config(endpoint: endpoint)
             network.delete(at: url, using: session, completion: completion)
         }
 
@@ -166,6 +160,11 @@ public struct NetworkAPIRequests: NetworkRequests {
 
 
     // MARK: - Private functions
+
+    /// - Precondition: `AppNetworkState.currentAppState` must not be nil
+    private func config(endpoint: EndpointType) throws -> (session: URLSession, url: URL) {
+        return try config(endpoint: endpoint.value)
+    }
 
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
     private func config(endpoint: String) throws -> (session: URLSession, url: URL) {
