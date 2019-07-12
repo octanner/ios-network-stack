@@ -74,7 +74,8 @@ public struct AppNetworkState {
         guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return false }
         return token.accessToken.contains(".")
     }
-    public func refreshToken() throws -> String? {
+    /// Loads the OAuth2Token from keychain, if present.
+    public func loadRefreshToken() throws -> String? {
         guard let token = try OAuth2Token(key: environmentKey, keychain: keychain) else { return nil }
         return token.refreshToken
     }
