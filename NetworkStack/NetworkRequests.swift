@@ -49,7 +49,7 @@ public struct NetworkAPIRequests: NetworkRequests {
         ]
         configuration.httpAdditionalHeaders = headers
 
-        configuration.timeoutIntervalForRequest = 10.0
+        configuration.timeoutIntervalForRequest = 40.0
         return URLSession(configuration: configuration)
     }
 
