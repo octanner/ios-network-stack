@@ -23,7 +23,7 @@ public struct Credentials {
 public protocol AuthRequests {
     func authenticate(with credentials: Credentials, completion: @escaping Network.ResponseCompletion)
     func authenticate(with pairingCode: String, completion: @escaping Network.ResponseCompletion)
-    func authenticate(with tokenJSON: JSONObject) throws
+    func persistToken(with tokenJSON: JSONObject) throws
     func refreshToken(completion: @escaping Network.ResponseCompletion)
     func logOut()
     func expireAccessToken()
@@ -156,7 +156,7 @@ public struct AuthAPIRequests: AuthRequests {
         var token: String?
         var clientCreds: (id: String, secret: String)?
         do {
-            token = try appNetworkState.refreshToken()
+            token = try appNetworkState.loadRefreshToken()
             clientCreds = try appNetworkState.client()
         } catch {
             completion(.error(error), nil)
@@ -202,7 +202,10 @@ public struct AuthAPIRequests: AuthRequests {
     }
     
     /// - Precondition: `AppNetworkState.currentAppState` must not be nil
-    public func authenticate(with tokenJSON: JSONObject) throws {
+    /// Throws an error if we don't have an `AppNetworkState.currentAppState`.
+    /// Throws if we cannot create an OAuth2Token from the json
+    /// Throws if we cannot save to the keychain for some reason.
+    public func persistToken(with tokenJSON: JSONObject) throws {
         guard let appNetworkState = AppNetworkState.currentAppState else { throw networkMisconfigured() }
         try appNetworkState.saveToken(tokenJSON)
     }

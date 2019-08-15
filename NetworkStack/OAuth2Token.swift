@@ -19,6 +19,7 @@ struct OAuth2Token: Unmarshaling {
     private static let accessTokenKey = "access_token"
     private static let expiresAtKey = "expires_at"
     private static let expiresInKey = "expires_in"
+    private static let expiresKey = "expires"
     private static let refreshTokenKey = "refresh_token"
     
     init(accessToken: String, expiresAt: Date = Date.distantPast, refreshToken: String? = nil) {
@@ -29,8 +30,14 @@ struct OAuth2Token: Unmarshaling {
     
     init(object: MarshaledObject) throws {
         self.accessToken = try object <| OAuth2Token.accessTokenKey
-        let expiresIn: TimeInterval = try object <| OAuth2Token.expiresInKey
-        self.expiresAt = Date(timeIntervalSinceNow: expiresIn)
+        var expiresIn: TimeInterval? = try object.value(for: OAuth2Token.expiresInKey) // common auth
+        // Common Auth uses `expires_in` and core Auth uses `expires`
+        // check for an optioal `expires_in` first, and if it doesn't exist then require `expires`.
+        if expiresIn == nil {
+            let expires: TimeInterval = try object <| OAuth2Token.expiresKey // core auth
+            expiresIn = expires
+        }
+        self.expiresAt = Date(timeIntervalSinceNow: expiresIn!)
         self.refreshToken = try object <| OAuth2Token.refreshTokenKey
     }
 
